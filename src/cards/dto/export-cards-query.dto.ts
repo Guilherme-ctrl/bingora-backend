@@ -1,9 +1,9 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { IsIn, IsOptional } from "class-validator";
 
 export class ExportCardsQueryDto {
-  @ApiPropertyOptional({ enum: ['json', 'csv'], default: 'json' })
+  @ApiPropertyOptional({ enum: ["json", "csv"], default: "json" })
   @IsOptional()
-  @IsIn(['json', 'csv'])
-  format: 'json' | 'csv' = 'json';
+  @IsIn(["json", "csv"])
+  format: "json" | "csv" = "json";
 }

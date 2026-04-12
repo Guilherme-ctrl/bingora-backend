@@ -11,38 +11,38 @@ import {
   Query,
   Res,
   UseGuards,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiProduces,
   ApiTags,
-} from '@nestjs/swagger';
-import type { Response } from 'express';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { SellerForbiddenGuard } from '../auth/seller-forbidden.guard';
-import { CurrentOrganizer } from '../organizers/current-organizer.decorator';
-import type { CurrentOrganizerPayload } from '../organizers/current-organizer.decorator';
-import { CardsService } from './cards.service';
-import { GenerateCardsDto } from './dto/generate-cards.dto';
-import { ListCardsQueryDto } from './dto/list-cards-query.dto';
-import { ExportCardsQueryDto } from './dto/export-cards-query.dto';
+} from "@nestjs/swagger";
+import type { Response } from "express";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { SellerForbiddenGuard } from "../auth/seller-forbidden.guard";
+import { CurrentOrganizer } from "../organizers/current-organizer.decorator";
+import type { CurrentOrganizerPayload } from "../organizers/current-organizer.decorator";
+import { CardsService } from "./cards.service";
+import { GenerateCardsDto } from "./dto/generate-cards.dto";
+import { ListCardsQueryDto } from "./dto/list-cards-query.dto";
+import { ExportCardsQueryDto } from "./dto/export-cards-query.dto";
 
-@ApiTags('cards')
-@Controller('events/:eventId/cards')
+@ApiTags("cards")
+@Controller("events/:eventId/cards")
 @UseGuards(JwtAuthGuard, SellerForbiddenGuard)
 @ApiBearerAuth()
 export class CardsController {
   constructor(private readonly cards: CardsService) {}
 
-  @Post('generate')
+  @Post("generate")
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Generate unique bingo cards for an event (once per event in MVP)',
+    summary: "Generate unique bingo cards for an event (once per event in MVP)",
   })
   async generate(
     @CurrentOrganizer() user: CurrentOrganizerPayload,
-    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param("eventId", ParseUUIDPipe) eventId: string,
     @Body() dto: GenerateCardsDto,
   ) {
     return this.cards.generate(
@@ -54,31 +54,31 @@ export class CardsController {
     );
   }
 
-  @Get('export')
+  @Get("export")
   @ApiOperation({
-    summary: 'Export all cards for printing',
+    summary: "Export all cards for printing",
     description:
-      '`format=json` returns a JSON array of card objects. `format=csv` returns CSV with a grid_json column suitable for tooling/PDF pipelines.',
+      "`format=json` returns a JSON array of card objects. `format=csv` returns CSV with a grid_json column suitable for tooling/PDF pipelines.",
   })
-  @ApiProduces('application/json', 'text/csv')
+  @ApiProduces("application/json", "text/csv")
   async export(
     @CurrentOrganizer() user: CurrentOrganizerPayload,
-    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param("eventId", ParseUUIDPipe) eventId: string,
     @Query() query: ExportCardsQueryDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const format = query.format ?? 'json';
+    const format = query.format ?? "json";
 
-    if (format === 'csv') {
+    if (format === "csv") {
       const csv = await this.cards.exportCsv(
         user.organizerId,
         user.role,
         eventId,
         user.sellerEventIds,
       );
-      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader(
-        'Content-Disposition',
+        "Content-Disposition",
         `attachment; filename="bingo-cards-${eventId}.csv"`,
       );
       return csv;
@@ -90,23 +90,23 @@ export class CardsController {
       eventId,
       user.sellerEventIds,
     );
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader(
-      'Content-Disposition',
+      "Content-Disposition",
       `inline; filename="bingo-cards-${eventId}.json"`,
     );
     return data;
   }
 
   @Get()
-  @Header('Cache-Control', 'no-store')
+  @Header("Cache-Control", "no-store")
   @ApiOperation({
     summary:
-      'List cards (paginated). Use status=available to list only unsold cards.',
+      "List cards (paginated). Use status=available to list only unsold cards.",
   })
   async list(
     @CurrentOrganizer() user: CurrentOrganizerPayload,
-    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param("eventId", ParseUUIDPipe) eventId: string,
     @Query() query: ListCardsQueryDto,
   ) {
     return this.cards.list(

@@ -1,9 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Type } from "class-transformer";
+import { IsInt, IsOptional, IsString, Min, MinLength } from "class-validator";
 
 export class CreatePrizeDto {
-  @ApiProperty({ example: 'First line' })
+  @ApiProperty({ example: "First line" })
   @IsString()
   @MinLength(1)
   name!: string;

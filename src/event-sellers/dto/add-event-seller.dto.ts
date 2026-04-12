@@ -1,14 +1,14 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
   IsEmail,
   IsOptional,
   IsString,
   MinLength,
   ValidateIf,
-} from 'class-validator';
+} from "class-validator";
 
 export class AddEventSellerDto {
-  @ApiProperty({ example: 'vendedor@example.com' })
+  @ApiProperty({ example: "vendedor@example.com" })
   @IsEmail()
   email!: string;
 

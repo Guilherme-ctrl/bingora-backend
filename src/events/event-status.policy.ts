@@ -1,6 +1,6 @@
-import { EventStatus } from '@prisma/client';
-import { ApiException } from '../common/exceptions/api.exception';
-import { HttpStatus } from '@nestjs/common';
+import { EventStatus } from "@prisma/client";
+import { ApiException } from "../common/exceptions/api.exception";
+import { HttpStatus } from "@nestjs/common";
 
 const ALLOWED_ON_CREATE: EventStatus[] = [
   EventStatus.draft,
@@ -15,8 +15,8 @@ export function assertAllowedCreateStatus(
   }
   if (!ALLOWED_ON_CREATE.includes(status)) {
     throw new ApiException(
-      'INVALID_EVENT_STATUS',
-      'New events may only be created as draft or scheduled.',
+      "INVALID_EVENT_STATUS",
+      "New events may only be created as draft or scheduled.",
       HttpStatus.UNPROCESSABLE_ENTITY,
     );
   }
@@ -45,7 +45,7 @@ export function assertValidStatusTransition(
 
   if (!allowed[from].includes(to)) {
     throw new ApiException(
-      'INVALID_STATUS_TRANSITION',
+      "INVALID_STATUS_TRANSITION",
       `Cannot change event status from "${from}" to "${to}".`,
       HttpStatus.CONFLICT,
     );

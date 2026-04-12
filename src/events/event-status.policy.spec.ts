@@ -1,13 +1,13 @@
-import { EventStatus } from '@prisma/client';
-import { ApiException } from '../common/exceptions/api.exception';
+import { EventStatus } from "@prisma/client";
+import { ApiException } from "../common/exceptions/api.exception";
 import {
   assertAllowedCreateStatus,
   assertValidStatusTransition,
   isEventLocked,
-} from './event-status.policy';
+} from "./event-status.policy";
 
-describe('event-status.policy', () => {
-  it('allows draft -> scheduled and draft -> cancelled', () => {
+describe("event-status.policy", () => {
+  it("allows draft -> scheduled and draft -> cancelled", () => {
     expect(() =>
       assertValidStatusTransition(EventStatus.draft, EventStatus.scheduled),
     ).not.toThrow();
@@ -16,7 +16,7 @@ describe('event-status.policy', () => {
     ).not.toThrow();
   });
 
-  it('allows scheduled -> in_progress', () => {
+  it("allows scheduled -> in_progress", () => {
     expect(() =>
       assertValidStatusTransition(
         EventStatus.scheduled,
@@ -25,7 +25,7 @@ describe('event-status.policy', () => {
     ).not.toThrow();
   });
 
-  it('allows in_progress -> completed', () => {
+  it("allows in_progress -> completed", () => {
     expect(() =>
       assertValidStatusTransition(
         EventStatus.in_progress,
@@ -34,13 +34,13 @@ describe('event-status.policy', () => {
     ).not.toThrow();
   });
 
-  it('rejects draft -> completed', () => {
+  it("rejects draft -> completed", () => {
     expect(() =>
       assertValidStatusTransition(EventStatus.draft, EventStatus.completed),
     ).toThrow(ApiException);
   });
 
-  it('rejects in_progress -> cancelled', () => {
+  it("rejects in_progress -> cancelled", () => {
     expect(() =>
       assertValidStatusTransition(
         EventStatus.in_progress,
@@ -49,13 +49,13 @@ describe('event-status.policy', () => {
     ).toThrow(ApiException);
   });
 
-  it('treats completed and cancelled as locked', () => {
+  it("treats completed and cancelled as locked", () => {
     expect(isEventLocked(EventStatus.completed)).toBe(true);
     expect(isEventLocked(EventStatus.cancelled)).toBe(true);
     expect(isEventLocked(EventStatus.draft)).toBe(false);
   });
 
-  it('allows only draft or scheduled on create', () => {
+  it("allows only draft or scheduled on create", () => {
     expect(() => assertAllowedCreateStatus(EventStatus.draft)).not.toThrow();
     expect(() =>
       assertAllowedCreateStatus(EventStatus.scheduled),

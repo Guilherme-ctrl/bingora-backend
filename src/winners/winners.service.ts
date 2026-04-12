@@ -1,11 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { OrganizerRole, Winner } from '@prisma/client';
-import { canAccessOrganizerResource } from '../common/access/organizer-resource-access';
-import { PrismaService } from '../prisma/prisma.service';
-import { ApiException } from '../common/exceptions/api.exception';
-import { EventsService } from '../events/events.service';
-import { isEventLocked } from '../events/event-status.policy';
-import type { CreateWinnerDto } from './dto/create-winner.dto';
+import { HttpStatus, Injectable } from "@nestjs/common";
+import { OrganizerRole, Winner } from "@prisma/client";
+import { canAccessOrganizerResource } from "../common/access/organizer-resource-access";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApiException } from "../common/exceptions/api.exception";
+import { EventsService } from "../events/events.service";
+import { isEventLocked } from "../events/event-status.policy";
+import type { CreateWinnerDto } from "./dto/create-winner.dto";
 
 export type WinnerResponse = {
   id: string;
@@ -40,7 +40,7 @@ export class WinnersService {
 
     const rows = await this.prisma.winner.findMany({
       where: { eventId },
-      orderBy: { recordedAt: 'desc' },
+      orderBy: { recordedAt: "desc" },
     });
 
     return { items: rows.map((w) => this.toResponse(w)) };
@@ -65,8 +65,8 @@ export class WinnersService {
     });
     if (!prize) {
       throw new ApiException(
-        'PRIZE_NOT_FOUND',
-        'Prize not found for this event.',
+        "PRIZE_NOT_FOUND",
+        "Prize not found for this event.",
         HttpStatus.NOT_FOUND,
       );
     }
@@ -76,8 +76,8 @@ export class WinnersService {
     });
     if (!participant) {
       throw new ApiException(
-        'PARTICIPANT_NOT_FOUND',
-        'Participant not found for this event.',
+        "PARTICIPANT_NOT_FOUND",
+        "Participant not found for this event.",
         HttpStatus.NOT_FOUND,
       );
     }
@@ -88,8 +88,8 @@ export class WinnersService {
       });
       if (!card) {
         throw new ApiException(
-          'CARD_NOT_FOUND',
-          'Bingo card not found for this event.',
+          "CARD_NOT_FOUND",
+          "Bingo card not found for this event.",
           HttpStatus.NOT_FOUND,
         );
       }
@@ -100,8 +100,8 @@ export class WinnersService {
     });
     if (activeForPrize) {
       throw new ApiException(
-        'PRIZE_ALREADY_HAS_WINNER',
-        'An active winner already exists for this prize.',
+        "PRIZE_ALREADY_HAS_WINNER",
+        "An active winner already exists for this prize.",
         HttpStatus.CONFLICT,
       );
     }
@@ -141,16 +141,16 @@ export class WinnersService {
       )
     ) {
       throw new ApiException(
-        'WINNER_NOT_FOUND',
-        'Winner not found.',
+        "WINNER_NOT_FOUND",
+        "Winner not found.",
         HttpStatus.NOT_FOUND,
       );
     }
 
     if (isEventLocked(winner.event.status)) {
       throw new ApiException(
-        'EVENT_LOCKED',
-        'Winners cannot be revoked while the event is completed or cancelled.',
+        "EVENT_LOCKED",
+        "Winners cannot be revoked while the event is completed or cancelled.",
         HttpStatus.CONFLICT,
       );
     }

@@ -1,4 +1,4 @@
-import { OrganizerRole } from '@prisma/client';
+import { OrganizerRole } from "@prisma/client";
 
 /**
  * `resourceEventId` — evento a que o recurso pertence (ex.: `sale.eventId`).

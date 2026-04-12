@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from "@nestjs/common";
 import {
   BingoCard,
   BingoCardStatus,
@@ -7,15 +7,15 @@ import {
   Prisma,
   Sale,
   SaleStatus,
-} from '@prisma/client';
-import { canAccessOrganizerResource } from '../common/access/organizer-resource-access';
-import { PrismaService } from '../prisma/prisma.service';
-import { ApiException } from '../common/exceptions/api.exception';
-import { EventsService } from '../events/events.service';
-import { isEventLocked } from '../events/event-status.policy';
-import type { CreateSaleDto } from './dto/create-sale.dto';
-import type { UpdateSaleDto } from './dto/update-sale.dto';
-import type { ListSalesQueryDto } from './dto/list-sales-query.dto';
+} from "@prisma/client";
+import { canAccessOrganizerResource } from "../common/access/organizer-resource-access";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApiException } from "../common/exceptions/api.exception";
+import { EventsService } from "../events/events.service";
+import { isEventLocked } from "../events/event-status.policy";
+import type { CreateSaleDto } from "./dto/create-sale.dto";
+import type { UpdateSaleDto } from "./dto/update-sale.dto";
+import type { ListSalesQueryDto } from "./dto/list-sales-query.dto";
 
 export type SaleCardSummary = {
   bingo_card_id: string;
@@ -74,13 +74,13 @@ export class SalesService {
 
     if (isEventLocked(event.status)) {
       throw new ApiException(
-        'EVENT_LOCKED',
-        'Sales cannot be created while the event is completed or cancelled.',
+        "EVENT_LOCKED",
+        "Sales cannot be created while the event is completed or cancelled.",
         HttpStatus.CONFLICT,
       );
     }
 
-    const currency = dto.currency ?? 'USD';
+    const currency = dto.currency ?? "USD";
 
     const result = await this.prisma.$transaction(
       async (tx) => {
@@ -90,8 +90,8 @@ export class SalesService {
 
         if (!participant) {
           throw new ApiException(
-            'PARTICIPANT_NOT_FOUND',
-            'Participant not found for this event.',
+            "PARTICIPANT_NOT_FOUND",
+            "Participant not found for this event.",
             HttpStatus.NOT_FOUND,
           );
         }
@@ -105,7 +105,7 @@ export class SalesService {
         if (useExplicitSerials) {
           if (requestedSerials.length !== dto.quantity) {
             throw new ApiException(
-              'SALE_SERIAL_COUNT_MISMATCH',
+              "SALE_SERIAL_COUNT_MISMATCH",
               `Informe exatamente ${dto.quantity} número(s) de cartela, ou omita serial_numbers para atribuir automaticamente.`,
               HttpStatus.BAD_REQUEST,
             );
@@ -113,8 +113,8 @@ export class SalesService {
           const uniq = new Set(requestedSerials);
           if (uniq.size !== requestedSerials.length) {
             throw new ApiException(
-              'DUPLICATE_SERIAL_IN_REQUEST',
-              'Números de cartela repetidos na solicitação.',
+              "DUPLICATE_SERIAL_IN_REQUEST",
+              "Números de cartela repetidos na solicitação.",
               HttpStatus.BAD_REQUEST,
             );
           }
@@ -130,8 +130,8 @@ export class SalesService {
             const found = new Set(bySerial.map((c) => c.serialNumber));
             const missing = requestedSerials.filter((s) => !found.has(s));
             throw new ApiException(
-              'CARD_SERIAL_NOT_FOUND',
-              `Número(s) de cartela inexistente(s) neste evento: ${missing.join(', ')}.`,
+              "CARD_SERIAL_NOT_FOUND",
+              `Número(s) de cartela inexistente(s) neste evento: ${missing.join(", ")}.`,
               HttpStatus.NOT_FOUND,
             );
           }
@@ -141,8 +141,8 @@ export class SalesService {
           );
           if (notAvail.length > 0) {
             throw new ApiException(
-              'CARD_NOT_AVAILABLE',
-              `Cartela(s) não disponível(is): ${notAvail.map((c) => c.serialNumber).join(', ')}.`,
+              "CARD_NOT_AVAILABLE",
+              `Cartela(s) não disponível(is): ${notAvail.map((c) => c.serialNumber).join(", ")}.`,
               HttpStatus.CONFLICT,
             );
           }
@@ -153,14 +153,14 @@ export class SalesService {
         } else {
           const available = await tx.bingoCard.findMany({
             where: { eventId, status: BingoCardStatus.available },
-            orderBy: { serialNumber: 'asc' },
+            orderBy: { serialNumber: "asc" },
             take: dto.quantity,
           });
 
           if (available.length < dto.quantity) {
             throw new ApiException(
-              'INSUFFICIENT_CARDS',
-              'Not enough available bingo cards for this sale.',
+              "INSUFFICIENT_CARDS",
+              "Not enough available bingo cards for this sale.",
               HttpStatus.CONFLICT,
             );
           }
@@ -238,7 +238,7 @@ export class SalesService {
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.sale.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip,
         take: page_size,
       }),
@@ -278,8 +278,8 @@ export class SalesService {
       )
     ) {
       throw new ApiException(
-        'SALE_NOT_FOUND',
-        'Sale not found.',
+        "SALE_NOT_FOUND",
+        "Sale not found.",
         HttpStatus.NOT_FOUND,
       );
     }
@@ -310,16 +310,16 @@ export class SalesService {
       )
     ) {
       throw new ApiException(
-        'SALE_NOT_FOUND',
-        'Sale not found.',
+        "SALE_NOT_FOUND",
+        "Sale not found.",
         HttpStatus.NOT_FOUND,
       );
     }
 
     if (existing.status === SaleStatus.voided) {
       throw new ApiException(
-        'SALE_VOIDED',
-        'Cannot update a voided sale.',
+        "SALE_VOIDED",
+        "Cannot update a voided sale.",
         HttpStatus.CONFLICT,
       );
     }
@@ -376,16 +376,16 @@ export class SalesService {
       )
     ) {
       throw new ApiException(
-        'SALE_NOT_FOUND',
-        'Sale not found.',
+        "SALE_NOT_FOUND",
+        "Sale not found.",
         HttpStatus.NOT_FOUND,
       );
     }
 
     if (isEventLocked(existing.event.status)) {
       throw new ApiException(
-        'EVENT_LOCKED',
-        'This sale cannot be voided while the event is completed or cancelled.',
+        "EVENT_LOCKED",
+        "This sale cannot be voided while the event is completed or cancelled.",
         HttpStatus.CONFLICT,
       );
     }

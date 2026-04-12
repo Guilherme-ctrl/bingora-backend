@@ -1,7 +1,7 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { EventStatus } from '@prisma/client';
-import { Type } from 'class-transformer';
-import { IsEnum, IsIn, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { EventStatus } from "@prisma/client";
+import { Type } from "class-transformer";
+import { IsEnum, IsIn, IsInt, IsOptional, Max, Min } from "class-validator";
 
 export class ListEventsQueryDto {
   @ApiPropertyOptional({ enum: EventStatus })
@@ -9,15 +9,15 @@ export class ListEventsQueryDto {
   @IsEnum(EventStatus)
   status?: EventStatus;
 
-  @ApiPropertyOptional({ enum: ['starts_at', 'created_at'] })
+  @ApiPropertyOptional({ enum: ["starts_at", "created_at"] })
   @IsOptional()
-  @IsIn(['starts_at', 'created_at'])
-  sort: 'starts_at' | 'created_at' = 'starts_at';
+  @IsIn(["starts_at", "created_at"])
+  sort: "starts_at" | "created_at" = "starts_at";
 
-  @ApiPropertyOptional({ enum: ['asc', 'desc'] })
+  @ApiPropertyOptional({ enum: ["asc", "desc"] })
   @IsOptional()
-  @IsIn(['asc', 'desc'])
-  order: 'asc' | 'desc' = 'desc';
+  @IsIn(["asc", "desc"])
+  order: "asc" | "desc" = "desc";
 
   @ApiPropertyOptional({ default: 1 })
   @IsOptional()

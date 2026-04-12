@@ -3,15 +3,15 @@ import {
   assertValidUs75Grid,
   fingerprintGrid,
   generateRandomGrid,
-} from './bingo-grid';
+} from "./bingo-grid";
 
-describe('bingo-grid', () => {
-  it('generates a valid US 75-ball grid with free center', () => {
+describe("bingo-grid", () => {
+  it("generates a valid US 75-ball grid with free center", () => {
     const grid = generateRandomGrid();
     assertValidUs75Grid(grid);
   });
 
-  it('uses correct column ranges across many samples', () => {
+  it("uses correct column ranges across many samples", () => {
     for (let i = 0; i < 50; i++) {
       const grid = generateRandomGrid();
       for (let c = 0; c < 5; c++) {
@@ -28,14 +28,14 @@ describe('bingo-grid', () => {
     }
   });
 
-  it('produces stable fingerprints for identical grids', () => {
+  it("produces stable fingerprints for identical grids", () => {
     const grid = generateRandomGrid();
     const a = fingerprintGrid(grid);
     const b = fingerprintGrid({ rows: grid.rows.map((row) => [...row]) });
     expect(a).toBe(b);
   });
 
-  it('produces different fingerprints for different grids (very likely)', () => {
+  it("produces different fingerprints for different grids (very likely)", () => {
     const seen = new Set<string>();
     for (let i = 0; i < 30; i++) {
       seen.add(fingerprintGrid(generateRandomGrid()));
@@ -44,7 +44,7 @@ describe('bingo-grid', () => {
   });
 
   /** Mirrors card batch generation: every fingerprint in a batch must be unique (event-scoped in DB). */
-  it('keeps fingerprints unique across a large batch (same as generation loop)', () => {
+  it("keeps fingerprints unique across a large batch (same as generation loop)", () => {
     const seen = new Set<string>();
     const n = 250;
     for (let i = 0; i < n; i++) {

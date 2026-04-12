@@ -9,6 +9,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
+const core_1 = require("@nestjs/core");
+const throttler_1 = require("@nestjs/throttler");
 const env_validation_1 = require("./config/env.validation");
 const prisma_module_1 = require("./prisma/prisma.module");
 const auth_module_1 = require("./auth/auth.module");
@@ -33,6 +35,12 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
                 validate: env_validation_1.validateEnv,
             }),
+            throttler_1.ThrottlerModule.forRoot([
+                {
+                    ttl: 60_000,
+                    limit: 120,
+                },
+            ]),
             prisma_module_1.PrismaModule,
             auth_module_1.AuthModule,
             organizers_module_1.OrganizersModule,
@@ -46,6 +54,12 @@ exports.AppModule = AppModule = __decorate([
             finance_module_1.FinanceModule,
             event_sellers_module_1.EventSellersModule,
             health_module_1.HealthModule,
+        ],
+        providers: [
+            {
+                provide: core_1.APP_GUARD,
+                useClass: throttler_1.ThrottlerGuard,
+            },
         ],
     })
 ], AppModule);

@@ -1,8 +1,8 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsEmail, IsOptional, IsString, MinLength } from "class-validator";
 
 export class CreateParticipantDto {
-  @ApiProperty({ example: 'Jane Doe' })
+  @ApiProperty({ example: "Jane Doe" })
   @IsString()
   @MinLength(1)
   display_name!: string;

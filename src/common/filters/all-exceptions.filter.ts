@@ -5,10 +5,10 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-} from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import type { Request, Response } from 'express';
-import type { ApiErrorBody } from '../exceptions/api.exception';
+} from "@nestjs/common";
+import { Prisma } from "@prisma/client";
+import type { Request, Response } from "express";
+import type { ApiErrorBody } from "../exceptions/api.exception";
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -27,36 +27,36 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const res = exception.getResponse();
       if (this.isApiErrorBody(res)) {
         body = res;
-      } else if (typeof res === 'string') {
+      } else if (typeof res === "string") {
         body = {
           error: {
-            code: 'HTTP_EXCEPTION',
+            code: "HTTP_EXCEPTION",
             message: res,
             details: {},
           },
         };
-      } else if (typeof res === 'object' && res !== null && 'message' in res) {
+      } else if (typeof res === "object" && res !== null && "message" in res) {
         const msg = (res as { message?: string | string[] }).message;
         const messages = Array.isArray(msg)
           ? msg
           : msg != null
             ? [msg]
             : [exception.message];
-        const message = messages.join('; ');
+        const message = messages.join("; ");
         body = {
           error: {
-            code: 'VALIDATION_ERROR',
+            code: "VALIDATION_ERROR",
             message,
             details: { messages },
           },
         };
         if (status === HttpStatus.BAD_REQUEST) {
-          body.error.code = 'VALIDATION_ERROR';
+          body.error.code = "VALIDATION_ERROR";
         }
       } else {
         body = {
           error: {
-            code: 'HTTP_EXCEPTION',
+            code: "HTTP_EXCEPTION",
             message: exception.message,
             details: {},
           },
@@ -66,35 +66,35 @@ export class AllExceptionsFilter implements ExceptionFilter {
       status = HttpStatus.CONFLICT;
       body = {
         error: {
-          code: 'DATABASE_ERROR',
-          message: 'A database constraint was violated.',
+          code: "DATABASE_ERROR",
+          message: "A database constraint was violated.",
           details: { prisma_code: exception.code },
         },
       };
-      if (exception.code === 'P2002') {
+      if (exception.code === "P2002") {
         status = HttpStatus.CONFLICT;
-        body.error.code = 'UNIQUE_VIOLATION';
-        body.error.message = 'A record with this value already exists.';
+        body.error.code = "UNIQUE_VIOLATION";
+        body.error.message = "A record with this value already exists.";
       }
-      if (exception.code === 'P2025') {
+      if (exception.code === "P2025") {
         status = HttpStatus.NOT_FOUND;
-        body.error.code = 'NOT_FOUND';
-        body.error.message = 'Record not found.';
+        body.error.code = "NOT_FOUND";
+        body.error.message = "Record not found.";
       }
     } else {
       const message =
         exception instanceof Error
           ? exception.message
-          : 'Internal server error';
+          : "Internal server error";
       this.logger.error(
         exception instanceof Error ? exception.stack : String(exception),
       );
       body = {
         error: {
-          code: 'INTERNAL_ERROR',
+          code: "INTERNAL_ERROR",
           message:
             status === HttpStatus.INTERNAL_SERVER_ERROR
-              ? 'Internal server error'
+              ? "Internal server error"
               : message,
           details: {},
         },
@@ -110,12 +110,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   private isApiErrorBody(value: unknown): value is ApiErrorBody {
-    if (typeof value !== 'object' || value === null) return false;
+    if (typeof value !== "object" || value === null) return false;
     const v = value as ApiErrorBody;
     return (
-      typeof v.error?.code === 'string' &&
-      typeof v.error?.message === 'string' &&
-      typeof v.error?.details === 'object' &&
+      typeof v.error?.code === "string" &&
+      typeof v.error?.message === "string" &&
+      typeof v.error?.details === "object" &&
       v.error.details !== null
     );
   }

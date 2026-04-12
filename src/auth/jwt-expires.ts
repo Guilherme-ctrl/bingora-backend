@@ -6,15 +6,15 @@ export function jwtExpiresInSeconds(expiresIn: string): number {
     return 3600;
   }
   const n = Number.parseInt(m[1], 10);
-  const u = (m[2] ?? 's').toLowerCase();
+  const u = (m[2] ?? "s").toLowerCase();
   switch (u) {
-    case 's':
+    case "s":
       return n;
-    case 'm':
+    case "m":
       return n * 60;
-    case 'h':
+    case "h":
       return n * 3600;
-    case 'd':
+    case "d":
       return n * 86400;
     default:
       return n;

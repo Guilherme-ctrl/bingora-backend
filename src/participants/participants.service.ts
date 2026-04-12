@@ -1,13 +1,13 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { OrganizerRole, Participant, Prisma, SaleStatus } from '@prisma/client';
-import { canAccessOrganizerResource } from '../common/access/organizer-resource-access';
-import { PrismaService } from '../prisma/prisma.service';
-import { ApiException } from '../common/exceptions/api.exception';
-import { EventsService } from '../events/events.service';
-import { isEventLocked } from '../events/event-status.policy';
-import type { CreateParticipantDto } from './dto/create-participant.dto';
-import type { UpdateParticipantDto } from './dto/update-participant.dto';
-import type { ListParticipantsQueryDto } from './dto/list-participants-query.dto';
+import { HttpStatus, Injectable } from "@nestjs/common";
+import { OrganizerRole, Participant, Prisma, SaleStatus } from "@prisma/client";
+import { canAccessOrganizerResource } from "../common/access/organizer-resource-access";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApiException } from "../common/exceptions/api.exception";
+import { EventsService } from "../events/events.service";
+import { isEventLocked } from "../events/event-status.policy";
+import type { CreateParticipantDto } from "./dto/create-participant.dto";
+import type { UpdateParticipantDto } from "./dto/update-participant.dto";
+import type { ListParticipantsQueryDto } from "./dto/list-participants-query.dto";
 
 export type ParticipantResponse = {
   id: string;
@@ -55,7 +55,7 @@ export class ParticipantsService {
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.participant.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip,
         take: page_size,
       }),
@@ -86,8 +86,8 @@ export class ParticipantsService {
 
     if (isEventLocked(event.status)) {
       throw new ApiException(
-        'EVENT_LOCKED',
-        'Participants cannot be modified while the event is completed or cancelled.',
+        "EVENT_LOCKED",
+        "Participants cannot be modified while the event is completed or cancelled.",
         HttpStatus.CONFLICT,
       );
     }
@@ -128,16 +128,16 @@ export class ParticipantsService {
       )
     ) {
       throw new ApiException(
-        'PARTICIPANT_NOT_FOUND',
-        'Participant not found.',
+        "PARTICIPANT_NOT_FOUND",
+        "Participant not found.",
         HttpStatus.NOT_FOUND,
       );
     }
 
     if (isEventLocked(participant.event.status)) {
       throw new ApiException(
-        'EVENT_LOCKED',
-        'Participants cannot be modified while the event is completed or cancelled.',
+        "EVENT_LOCKED",
+        "Participants cannot be modified while the event is completed or cancelled.",
         HttpStatus.CONFLICT,
       );
     }
@@ -189,16 +189,16 @@ export class ParticipantsService {
       )
     ) {
       throw new ApiException(
-        'PARTICIPANT_NOT_FOUND',
-        'Participant not found.',
+        "PARTICIPANT_NOT_FOUND",
+        "Participant not found.",
         HttpStatus.NOT_FOUND,
       );
     }
 
     if (isEventLocked(participant.event.status)) {
       throw new ApiException(
-        'EVENT_LOCKED',
-        'Participants cannot be modified while the event is completed or cancelled.',
+        "EVENT_LOCKED",
+        "Participants cannot be modified while the event is completed or cancelled.",
         HttpStatus.CONFLICT,
       );
     }
@@ -209,8 +209,8 @@ export class ParticipantsService {
 
     if (activeSale) {
       throw new ApiException(
-        'PARTICIPANT_HAS_ACTIVE_SALES',
-        'Cannot delete a participant that has active sales.',
+        "PARTICIPANT_HAS_ACTIVE_SALES",
+        "Cannot delete a participant that has active sales.",
         HttpStatus.CONFLICT,
       );
     }

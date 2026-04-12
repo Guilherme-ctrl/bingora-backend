@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { OrganizerRole, PaymentStatus, SaleStatus } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { EventsService } from '../events/events.service';
+import { Injectable } from "@nestjs/common";
+import { OrganizerRole, PaymentStatus, SaleStatus } from "@prisma/client";
+import { PrismaService } from "../prisma/prisma.service";
+import { EventsService } from "../events/events.service";
 
 export type CurrencyBreakdown = {
   currency: string;
@@ -66,8 +66,12 @@ export class FinanceService {
 
     const bucket = new Map<string, { paid: number; unpaid: number }>();
 
-    const addCents = (currency: string, status: PaymentStatus, cents: number) => {
-      const c = currency.trim().toUpperCase() || 'BRL';
+    const addCents = (
+      currency: string,
+      status: PaymentStatus,
+      cents: number,
+    ) => {
+      const c = currency.trim().toUpperCase() || "BRL";
       if (!bucket.has(c)) {
         bucket.set(c, { paid: 0, unpaid: 0 });
       }

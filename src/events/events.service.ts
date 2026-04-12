@@ -1,15 +1,15 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { EventStatus, OrganizerRole, Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { ApiException } from '../common/exceptions/api.exception';
+import { HttpStatus, Injectable } from "@nestjs/common";
+import { EventStatus, OrganizerRole, Prisma } from "@prisma/client";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApiException } from "../common/exceptions/api.exception";
 import {
   assertAllowedCreateStatus,
   assertValidStatusTransition,
   isEventLocked,
-} from './event-status.policy';
-import type { CreateEventDto } from './dto/create-event.dto';
-import type { UpdateEventDto } from './dto/update-event.dto';
-import type { ListEventsQueryDto } from './dto/list-events-query.dto';
+} from "./event-status.policy";
+import type { CreateEventDto } from "./dto/create-event.dto";
+import type { UpdateEventDto } from "./dto/update-event.dto";
+import type { ListEventsQueryDto } from "./dto/list-events-query.dto";
 
 const organizerEmailInclude = {
   organizer: { select: { email: true } },
@@ -67,10 +67,10 @@ export class EventsService {
       where.status = query.status;
     }
 
-    const sortField = query.sort ?? 'starts_at';
-    const order = query.order ?? 'desc';
+    const sortField = query.sort ?? "starts_at";
+    const order = query.order ?? "desc";
     const orderBy: Prisma.EventOrderByWithRelationInput =
-      sortField === 'created_at' ? { createdAt: order } : { startsAt: order };
+      sortField === "created_at" ? { createdAt: order } : { startsAt: order };
 
     const skip = (page - 1) * page_size;
 
@@ -108,7 +108,7 @@ export class EventsService {
         timezone: dto.timezone,
         venueNotes: dto.venue_notes ?? null,
         defaultUnitPriceCents: dto.default_unit_price_cents ?? null,
-        defaultCurrency: dto.default_currency ?? 'BRL',
+        defaultCurrency: dto.default_currency ?? "BRL",
         status,
       },
       include: organizerEmailInclude,
@@ -153,8 +153,8 @@ export class EventsService {
 
     if (isEventLocked(existing.status)) {
       throw new ApiException(
-        'EVENT_LOCKED',
-        'This event is completed or cancelled and cannot be modified.',
+        "EVENT_LOCKED",
+        "This event is completed or cancelled and cannot be modified.",
         HttpStatus.CONFLICT,
       );
     }
@@ -214,8 +214,8 @@ export class EventsService {
     );
     if (isEventLocked(existing.status)) {
       throw new ApiException(
-        'EVENT_LOCKED',
-        'This event is completed or cancelled and cannot be modified.',
+        "EVENT_LOCKED",
+        "This event is completed or cancelled and cannot be modified.",
         HttpStatus.CONFLICT,
       );
     }
@@ -223,8 +223,8 @@ export class EventsService {
       const prefix = `/uploads/event-logos/${eventId}.`;
       if (!logoUrl.startsWith(prefix)) {
         throw new ApiException(
-          'INVALID_LOGO_PATH',
-          'Invalid logo path.',
+          "INVALID_LOGO_PATH",
+          "Invalid logo path.",
           HttpStatus.BAD_REQUEST,
         );
       }
@@ -255,8 +255,8 @@ export class EventsService {
       });
       if (!event) {
         throw new ApiException(
-          'EVENT_NOT_FOUND',
-          'Event not found.',
+          "EVENT_NOT_FOUND",
+          "Event not found.",
           HttpStatus.NOT_FOUND,
         );
       }
@@ -265,8 +265,8 @@ export class EventsService {
     if (role === OrganizerRole.seller) {
       if (!sellerEventIds.includes(eventId)) {
         throw new ApiException(
-          'EVENT_NOT_FOUND',
-          'Event not found.',
+          "EVENT_NOT_FOUND",
+          "Event not found.",
           HttpStatus.NOT_FOUND,
         );
       }
@@ -276,8 +276,8 @@ export class EventsService {
       });
       if (!event) {
         throw new ApiException(
-          'EVENT_NOT_FOUND',
-          'Event not found.',
+          "EVENT_NOT_FOUND",
+          "Event not found.",
           HttpStatus.NOT_FOUND,
         );
       }
@@ -297,8 +297,8 @@ export class EventsService {
     });
     if (!event) {
       throw new ApiException(
-        'EVENT_NOT_FOUND',
-        'Event not found.',
+        "EVENT_NOT_FOUND",
+        "Event not found.",
         HttpStatus.NOT_FOUND,
       );
     }

@@ -1,7 +1,7 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { BingoCardStatus } from '@prisma/client';
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { BingoCardStatus } from "@prisma/client";
+import { Type } from "class-transformer";
+import { IsEnum, IsInt, IsOptional, Max, Min } from "class-validator";
 
 export class ListCardsQueryDto {
   @ApiPropertyOptional({ default: 1 })
@@ -21,13 +21,13 @@ export class ListCardsQueryDto {
 
   @ApiPropertyOptional({
     enum: BingoCardStatus,
-    description: 'Filter by status (e.g. available)',
+    description: "Filter by status (e.g. available)",
   })
   @IsOptional()
   @IsEnum(BingoCardStatus)
   status?: BingoCardStatus;
 
-  @ApiPropertyOptional({ description: 'Exact serial number' })
+  @ApiPropertyOptional({ description: "Exact serial number" })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

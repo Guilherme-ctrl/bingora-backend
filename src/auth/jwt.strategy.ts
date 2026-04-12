@@ -1,15 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { OrganizerRole } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import type { AppEnv } from '../config/env.validation';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { OrganizerRole } from "@prisma/client";
+import { PrismaService } from "../prisma/prisma.service";
+import type { AppEnv } from "../config/env.validation";
 
 export type JwtPayload = { sub: string; email: string; role: OrganizerRole };
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
   constructor(
     config: ConfigService<AppEnv, true>,
     private readonly prisma: PrismaService,
@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: config.get('JWT_SECRET', { infer: true }),
+      secretOrKey: config.get("JWT_SECRET", { infer: true }),
     });
   }
 

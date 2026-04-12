@@ -5,30 +5,30 @@ import {
   ParseUUIDPipe,
   Post,
   UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { SellerForbiddenGuard } from '../auth/seller-forbidden.guard';
-import { CurrentOrganizer } from '../organizers/current-organizer.decorator';
-import type { CurrentOrganizerPayload } from '../organizers/current-organizer.decorator';
-import { WinnersService } from './winners.service';
-import { RevokeWinnerDto } from './dto/revoke-winner.dto';
+} from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { SellerForbiddenGuard } from "../auth/seller-forbidden.guard";
+import { CurrentOrganizer } from "../organizers/current-organizer.decorator";
+import type { CurrentOrganizerPayload } from "../organizers/current-organizer.decorator";
+import { WinnersService } from "./winners.service";
+import { RevokeWinnerDto } from "./dto/revoke-winner.dto";
 
-@ApiTags('winners')
-@Controller('winners')
+@ApiTags("winners")
+@Controller("winners")
 @UseGuards(JwtAuthGuard, SellerForbiddenGuard)
 @ApiBearerAuth()
 export class WinnersController {
   constructor(private readonly winners: WinnersService) {}
 
-  @Post(':winnerId/revoke')
+  @Post(":winnerId/revoke")
   @ApiOperation({
-    summary: 'Revoke a winner',
-    description: 'Body `reason` is accepted; not persisted in MVP.',
+    summary: "Revoke a winner",
+    description: "Body `reason` is accepted; not persisted in MVP.",
   })
   async revoke(
     @CurrentOrganizer() user: CurrentOrganizerPayload,
-    @Param('winnerId', ParseUUIDPipe) winnerId: string,
+    @Param("winnerId", ParseUUIDPipe) winnerId: string,
     @Body() body: RevokeWinnerDto,
   ) {
     void body.reason;

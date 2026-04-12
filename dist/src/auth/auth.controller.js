@@ -16,6 +16,7 @@ exports.AuthController = void 0;
 const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const throttler_1 = require("@nestjs/throttler");
 const auth_service_1 = require("./auth.service");
 const register_dto_1 = require("./dto/register.dto");
 const login_dto_1 = require("./dto/login.dto");
@@ -38,6 +39,7 @@ let AuthController = class AuthController {
 exports.AuthController = AuthController;
 __decorate([
     (0, common_1.Post)('register'),
+    (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60_000 } }),
     (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
     (0, swagger_1.ApiOperation)({ summary: 'Register a new organizer' }),
     openapi.ApiResponse({ status: common_1.HttpStatus.CREATED, type: require("./dto/auth-response.dto").AuthTokensResponseDto }),
@@ -48,6 +50,7 @@ __decorate([
 ], AuthController.prototype, "register", null);
 __decorate([
     (0, common_1.Post)('login'),
+    (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60_000 } }),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Log in' }),
     openapi.ApiResponse({ status: common_1.HttpStatus.OK, type: require("./dto/auth-response.dto").AuthTokensResponseDto }),

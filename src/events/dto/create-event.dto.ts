@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { EventStatus } from '@prisma/client';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { EventStatus } from "@prisma/client";
+import { Type } from "class-transformer";
 import {
   IsDateString,
   IsEnum,
@@ -11,24 +11,24 @@ import {
   Min,
   MinLength,
   ValidateIf,
-} from 'class-validator';
+} from "class-validator";
 
 export class CreateEventDto {
-  @ApiProperty({ example: 'Friday Night Bingo' })
+  @ApiProperty({ example: "Friday Night Bingo" })
   @IsString()
   @MinLength(1)
   title!: string;
 
-  @ApiProperty({ example: '2026-04-15T23:00:00.000Z' })
+  @ApiProperty({ example: "2026-04-15T23:00:00.000Z" })
   @IsDateString()
   starts_at!: string;
 
-  @ApiProperty({ example: 'America/New_York' })
+  @ApiProperty({ example: "America/New_York" })
   @IsString()
   @MinLength(1)
   timezone!: string;
 
-  @ApiPropertyOptional({ nullable: true, example: 'Hall A' })
+  @ApiPropertyOptional({ nullable: true, example: "Hall A" })
   @IsOptional()
   @IsString()
   venue_notes?: string | null;
@@ -40,7 +40,7 @@ export class CreateEventDto {
 
   @ApiPropertyOptional({
     nullable: true,
-    description: 'Preço padrão da cartela em centavos (ex.: 500 = R$ 5,00).',
+    description: "Preço padrão da cartela em centavos (ex.: 500 = R$ 5,00).",
     example: 500,
   })
   @IsOptional()
@@ -51,8 +51,8 @@ export class CreateEventDto {
   default_unit_price_cents?: number | null;
 
   @ApiPropertyOptional({
-    example: 'BRL',
-    description: 'Código ISO 4217 para o preço padrão da cartela.',
+    example: "BRL",
+    description: "Código ISO 4217 para o preço padrão da cartela.",
   })
   @IsOptional()
   @IsString()

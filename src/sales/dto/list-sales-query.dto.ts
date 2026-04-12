@@ -1,7 +1,7 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { PaymentStatus, SaleStatus } from '@prisma/client';
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { PaymentStatus, SaleStatus } from "@prisma/client";
+import { Type } from "class-transformer";
+import { IsEnum, IsInt, IsOptional, Max, Min } from "class-validator";
 
 export class ListSalesQueryDto {
   @ApiPropertyOptional({ default: 1 })
@@ -26,7 +26,7 @@ export class ListSalesQueryDto {
 
   @ApiPropertyOptional({
     enum: SaleStatus,
-    description: 'Sale lifecycle (active | voided)',
+    description: "Sale lifecycle (active | voided)",
   })
   @IsOptional()
   @IsEnum(SaleStatus)

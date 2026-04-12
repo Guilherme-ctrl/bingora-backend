@@ -1,12 +1,17 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { BingoCard, BingoCardStatus, OrganizerRole, Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { ApiException } from '../common/exceptions/api.exception';
-import { EventsService } from '../events/events.service';
-import { fingerprintGrid, generateRandomGrid } from './bingo-grid';
-import type { BingoGridPayload } from './bingo-grid';
-import type { GenerateCardsDto } from './dto/generate-cards.dto';
-import type { ListCardsQueryDto } from './dto/list-cards-query.dto';
+import { HttpStatus, Injectable } from "@nestjs/common";
+import {
+  BingoCard,
+  BingoCardStatus,
+  OrganizerRole,
+  Prisma,
+} from "@prisma/client";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApiException } from "../common/exceptions/api.exception";
+import { EventsService } from "../events/events.service";
+import { fingerprintGrid, generateRandomGrid } from "./bingo-grid";
+import type { BingoGridPayload } from "./bingo-grid";
+import type { GenerateCardsDto } from "./dto/generate-cards.dto";
+import type { ListCardsQueryDto } from "./dto/list-cards-query.dto";
 
 export type CardResponse = {
   id: string;
@@ -44,8 +49,8 @@ export class CardsService {
       const existing = await tx.bingoCard.count({ where: { eventId } });
       if (existing > 0) {
         throw new ApiException(
-          'CARDS_ALREADY_EXIST',
-          'Cards already exist for this event. Regeneration is blocked in MVP.',
+          "CARDS_ALREADY_EXIST",
+          "Cards already exist for this event. Regeneration is blocked in MVP.",
           HttpStatus.CONFLICT,
         );
       }
@@ -54,7 +59,7 @@ export class CardsService {
       const batch: Prisma.BingoCardCreateManyInput[] = [];
 
       for (let serial = 1; serial <= dto.count; serial++) {
-        let fingerprint = '';
+        let fingerprint = "";
         let grid: BingoGridPayload | null = null;
 
         for (
@@ -74,8 +79,8 @@ export class CardsService {
 
         if (!grid) {
           throw new ApiException(
-            'CARD_GENERATION_FAILED',
-            'Could not generate a unique card grid after multiple attempts.',
+            "CARD_GENERATION_FAILED",
+            "Could not generate a unique card grid after multiple attempts.",
             HttpStatus.INTERNAL_SERVER_ERROR,
           );
         }
@@ -130,7 +135,7 @@ export class CardsService {
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.bingoCard.findMany({
         where,
-        orderBy: [{ serialNumber: 'asc' }],
+        orderBy: [{ serialNumber: "asc" }],
         skip,
         take: page_size,
       }),
@@ -161,7 +166,7 @@ export class CardsService {
 
     const rows = await this.prisma.bingoCard.findMany({
       where: { eventId },
-      orderBy: { serialNumber: 'asc' },
+      orderBy: { serialNumber: "asc" },
     });
 
     return rows.map((c) => this.toResponse(c));
@@ -186,7 +191,7 @@ export class CardsService {
     const rows = await this.prisma.bingoCard.findMany({
       where: { eventId, status: BingoCardStatus.available },
       select: { serialNumber: true },
-      orderBy: { serialNumber: 'asc' },
+      orderBy: { serialNumber: "asc" },
     });
     return { serial_numbers: rows.map((r) => r.serialNumber) };
   }
@@ -203,14 +208,14 @@ export class CardsService {
       eventId,
       sellerEventIds,
     );
-    const lines = ['id,event_id,serial_number,status,grid_json'];
+    const lines = ["id,event_id,serial_number,status,grid_json"];
     for (const c of cards) {
       const gridJson = JSON.stringify(c.grid).replaceAll('"', '""');
       lines.push(
         `${c.id},${c.event_id},${c.serial_number},${c.status},"${gridJson}"`,
       );
     }
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   private toResponse(card: BingoCard): CardResponse {

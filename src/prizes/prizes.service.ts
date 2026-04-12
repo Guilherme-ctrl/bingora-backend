@@ -1,12 +1,12 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { OrganizerRole, Prize } from '@prisma/client';
-import { canAccessOrganizerResource } from '../common/access/organizer-resource-access';
-import { PrismaService } from '../prisma/prisma.service';
-import { ApiException } from '../common/exceptions/api.exception';
-import { EventsService } from '../events/events.service';
-import { isEventLocked } from '../events/event-status.policy';
-import type { CreatePrizeDto } from './dto/create-prize.dto';
-import type { UpdatePrizeDto } from './dto/update-prize.dto';
+import { HttpStatus, Injectable } from "@nestjs/common";
+import { OrganizerRole, Prize } from "@prisma/client";
+import { canAccessOrganizerResource } from "../common/access/organizer-resource-access";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApiException } from "../common/exceptions/api.exception";
+import { EventsService } from "../events/events.service";
+import { isEventLocked } from "../events/event-status.policy";
+import type { CreatePrizeDto } from "./dto/create-prize.dto";
+import type { UpdatePrizeDto } from "./dto/update-prize.dto";
 
 export type PrizeResponse = {
   id: string;
@@ -40,7 +40,7 @@ export class PrizesService {
 
     const prizes = await this.prisma.prize.findMany({
       where: { eventId },
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     });
 
     return { items: prizes.map((p) => this.toResponse(p)) };
@@ -62,8 +62,8 @@ export class PrizesService {
 
     if (isEventLocked(event.status)) {
       throw new ApiException(
-        'EVENT_LOCKED',
-        'Prizes cannot be modified while the event is completed or cancelled.',
+        "EVENT_LOCKED",
+        "Prizes cannot be modified while the event is completed or cancelled.",
         HttpStatus.CONFLICT,
       );
     }
@@ -103,16 +103,16 @@ export class PrizesService {
       )
     ) {
       throw new ApiException(
-        'PRIZE_NOT_FOUND',
-        'Prize not found.',
+        "PRIZE_NOT_FOUND",
+        "Prize not found.",
         HttpStatus.NOT_FOUND,
       );
     }
 
     if (isEventLocked(prize.event.status)) {
       throw new ApiException(
-        'EVENT_LOCKED',
-        'Prizes cannot be modified while the event is completed or cancelled.',
+        "EVENT_LOCKED",
+        "Prizes cannot be modified while the event is completed or cancelled.",
         HttpStatus.CONFLICT,
       );
     }
@@ -162,16 +162,16 @@ export class PrizesService {
       )
     ) {
       throw new ApiException(
-        'PRIZE_NOT_FOUND',
-        'Prize not found.',
+        "PRIZE_NOT_FOUND",
+        "Prize not found.",
         HttpStatus.NOT_FOUND,
       );
     }
 
     if (isEventLocked(prize.event.status)) {
       throw new ApiException(
-        'EVENT_LOCKED',
-        'Prizes cannot be modified while the event is completed or cancelled.',
+        "EVENT_LOCKED",
+        "Prizes cannot be modified while the event is completed or cancelled.",
         HttpStatus.CONFLICT,
       );
     }
@@ -182,8 +182,8 @@ export class PrizesService {
     });
     if (winnerRow) {
       throw new ApiException(
-        'PRIZE_HAS_WINNER',
-        'Cannot delete a prize that is linked to winner records.',
+        "PRIZE_HAS_WINNER",
+        "Cannot delete a prize that is linked to winner records.",
         HttpStatus.CONFLICT,
       );
     }

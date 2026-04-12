@@ -13,6 +13,7 @@ exports.HealthController = void 0;
 const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const throttler_1 = require("@nestjs/throttler");
 const prisma_service_1 = require("../prisma/prisma.service");
 let HealthController = class HealthController {
     prisma;
@@ -27,6 +28,7 @@ let HealthController = class HealthController {
 exports.HealthController = HealthController;
 __decorate([
     (0, common_1.Get)(),
+    (0, throttler_1.SkipThrottle)(),
     (0, swagger_1.ApiOperation)({ summary: 'Liveness and database connectivity' }),
     openapi.ApiResponse({ status: 200 }),
     __metadata("design:type", Function),

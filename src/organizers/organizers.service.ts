@@ -1,7 +1,7 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { OrganizerRole } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { ApiException } from '../common/exceptions/api.exception';
+import { HttpStatus, Injectable } from "@nestjs/common";
+import { OrganizerRole } from "@prisma/client";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApiException } from "../common/exceptions/api.exception";
 
 export type OrganizerProfileDto = {
   id: string;
@@ -22,8 +22,8 @@ export class OrganizersService {
     });
     if (!organizer) {
       throw new ApiException(
-        'ORGANIZER_NOT_FOUND',
-        'Organizer not found.',
+        "ORGANIZER_NOT_FOUND",
+        "Organizer not found.",
         HttpStatus.NOT_FOUND,
       );
     }

@@ -1,19 +1,19 @@
-import { EventStatus } from '@prisma/client';
-import { assertBallNumberInRange, canUseDrawForEvent } from './draw.policy';
+import { EventStatus } from "@prisma/client";
+import { assertBallNumberInRange, canUseDrawForEvent } from "./draw.policy";
 
-describe('draw.policy', () => {
-  it('allows scheduled and in_progress for draw', () => {
+describe("draw.policy", () => {
+  it("allows scheduled and in_progress for draw", () => {
     expect(canUseDrawForEvent(EventStatus.scheduled)).toBe(true);
     expect(canUseDrawForEvent(EventStatus.in_progress)).toBe(true);
   });
 
-  it('disallows draft, completed, cancelled', () => {
+  it("disallows draft, completed, cancelled", () => {
     expect(canUseDrawForEvent(EventStatus.draft)).toBe(false);
     expect(canUseDrawForEvent(EventStatus.completed)).toBe(false);
     expect(canUseDrawForEvent(EventStatus.cancelled)).toBe(false);
   });
 
-  it('validates ball_number range', () => {
+  it("validates ball_number range", () => {
     expect(() => assertBallNumberInRange(1)).not.toThrow();
     expect(() => assertBallNumberInRange(75)).not.toThrow();
     expect(() => assertBallNumberInRange(0)).toThrow();

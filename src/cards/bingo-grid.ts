@@ -1,5 +1,5 @@
-import { createHash } from 'crypto';
-import { randomInt } from 'crypto';
+import { createHash } from "crypto";
+import { randomInt } from "crypto";
 
 /** B, I, N, G, O column inclusive ranges (US 75-ball). */
 export const COLUMN_RANGES: readonly [number, number][] = [
@@ -46,7 +46,7 @@ export function generateRandomGrid(): BingoGridPayload {
 
 export function fingerprintGrid(grid: BingoGridPayload): string {
   const canonical = JSON.stringify(grid.rows);
-  return createHash('sha256').update(canonical, 'utf8').digest('hex');
+  return createHash("sha256").update(canonical, "utf8").digest("hex");
 }
 
 function rangeInclusive(lo: number, hi: number): number[] {
@@ -69,15 +69,15 @@ export function shuffleInPlace<T>(arr: T[]): T[] {
 /** Validates column ranges and single null at center (for tests). */
 export function assertValidUs75Grid(grid: BingoGridPayload): void {
   if (grid.rows.length !== 5) {
-    throw new Error('Grid must have 5 rows');
+    throw new Error("Grid must have 5 rows");
   }
   for (const row of grid.rows) {
     if (row.length !== 5) {
-      throw new Error('Each row must have 5 cells');
+      throw new Error("Each row must have 5 cells");
     }
   }
   if (grid.rows[2][2] !== null) {
-    throw new Error('Center cell must be null');
+    throw new Error("Center cell must be null");
   }
   for (let r = 0; r < 5; r++) {
     for (let c = 0; c < 5; c++) {
@@ -85,8 +85,8 @@ export function assertValidUs75Grid(grid: BingoGridPayload): void {
         continue;
       }
       const v = grid.rows[r][c]!;
-      if (typeof v !== 'number' || !Number.isInteger(v)) {
-        throw new Error('Non-center cells must be integers');
+      if (typeof v !== "number" || !Number.isInteger(v)) {
+        throw new Error("Non-center cells must be integers");
       }
       const [lo, hi] = COLUMN_RANGES[c];
       if (v < lo || v > hi) {

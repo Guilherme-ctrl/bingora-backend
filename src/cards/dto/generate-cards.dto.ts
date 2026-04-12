@@ -1,8 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { Equals, IsInt, Max, Min } from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger";
+import { Type } from "class-transformer";
+import { Equals, IsInt, Max, Min } from "class-validator";
 
-export const US_75_BALL_5X5 = 'us_75_ball_5x5' as const;
+export const US_75_BALL_5X5 = "us_75_ball_5x5" as const;
 
 export class GenerateCardsDto {
   @ApiProperty({ example: 100, minimum: 1 })

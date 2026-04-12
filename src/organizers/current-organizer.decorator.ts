@@ -1,5 +1,5 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import type { OrganizerRole } from '@prisma/client';
+import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import type { OrganizerRole } from "@prisma/client";
 
 export type CurrentOrganizerPayload = {
   organizerId: string;

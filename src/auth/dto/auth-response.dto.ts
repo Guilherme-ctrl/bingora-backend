@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { OrganizerRole } from '@prisma/client';
+import { ApiProperty } from "@nestjs/swagger";
+import { OrganizerRole } from "@prisma/client";
 
 export class OrganizerPublicDto {
   @ApiProperty()
@@ -8,7 +8,7 @@ export class OrganizerPublicDto {
   @ApiProperty()
   email!: string;
 
-  @ApiProperty({ enum: OrganizerRole, enumName: 'OrganizerRole' })
+  @ApiProperty({ enum: OrganizerRole, enumName: "OrganizerRole" })
   role!: OrganizerRole;
 
   @ApiProperty()
@@ -22,7 +22,7 @@ export class AuthTokensResponseDto {
   @ApiProperty()
   access_token!: string;
 
-  @ApiProperty({ example: 'Bearer' })
+  @ApiProperty({ example: "Bearer" })
   token_type!: string;
 
   @ApiProperty({ example: 3600 })

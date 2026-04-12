@@ -1,10 +1,10 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { OrganizerRole, Prisma } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
-import { PrismaService } from '../prisma/prisma.service';
-import { ApiException } from '../common/exceptions/api.exception';
-import { EventsService } from '../events/events.service';
-import type { AddEventSellerDto } from './dto/add-event-seller.dto';
+import { HttpStatus, Injectable } from "@nestjs/common";
+import { OrganizerRole, Prisma } from "@prisma/client";
+import * as bcrypt from "bcrypt";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApiException } from "../common/exceptions/api.exception";
+import { EventsService } from "../events/events.service";
+import type { AddEventSellerDto } from "./dto/add-event-seller.dto";
 
 const BCRYPT_ROUNDS = 12;
 
@@ -41,13 +41,13 @@ export class EventSellersService {
       sellerEventIds,
     );
     if (role === OrganizerRole.seller) {
-      throw new ApiException('FORBIDDEN', 'Forbidden.', HttpStatus.FORBIDDEN);
+      throw new ApiException("FORBIDDEN", "Forbidden.", HttpStatus.FORBIDDEN);
     }
 
     const rows = await this.prisma.eventSeller.findMany({
       where: { eventId },
       include: { seller: { select: { email: true } } },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
     });
 
     return {
@@ -73,10 +73,10 @@ export class EventSellersService {
       sellerEventIds,
     );
     if (role === OrganizerRole.seller) {
-      throw new ApiException('FORBIDDEN', 'Forbidden.', HttpStatus.FORBIDDEN);
+      throw new ApiException("FORBIDDEN", "Forbidden.", HttpStatus.FORBIDDEN);
     }
     if (role !== OrganizerRole.admin && event.organizerId !== organizerId) {
-      throw new ApiException('FORBIDDEN', 'Forbidden.', HttpStatus.FORBIDDEN);
+      throw new ApiException("FORBIDDEN", "Forbidden.", HttpStatus.FORBIDDEN);
     }
 
     const email = this.normalizeEmail(dto.email);
@@ -89,8 +89,8 @@ export class EventSellersService {
     if (!existing) {
       if (!dto.password || dto.password.length < 8) {
         throw new ApiException(
-          'PASSWORD_REQUIRED',
-          'Password is required (min 8 characters) when creating a new seller account.',
+          "PASSWORD_REQUIRED",
+          "Password is required (min 8 characters) when creating a new seller account.",
           HttpStatus.BAD_REQUEST,
         );
       }
@@ -107,11 +107,11 @@ export class EventSellersService {
       } catch (e) {
         if (
           e instanceof Prisma.PrismaClientKnownRequestError &&
-          e.code === 'P2002'
+          e.code === "P2002"
         ) {
           throw new ApiException(
-            'EMAIL_ALREADY_REGISTERED',
-            'An account with this email already exists.',
+            "EMAIL_ALREADY_REGISTERED",
+            "An account with this email already exists.",
             HttpStatus.CONFLICT,
           );
         }
@@ -120,8 +120,8 @@ export class EventSellersService {
     } else {
       if (existing.role !== OrganizerRole.seller) {
         throw new ApiException(
-          'ORGANIZER_NOT_SELLER',
-          'This email belongs to an account that is not a seller. Use a different email.',
+          "ORGANIZER_NOT_SELLER",
+          "This email belongs to an account that is not a seller. Use a different email.",
           HttpStatus.CONFLICT,
         );
       }
@@ -144,11 +144,11 @@ export class EventSellersService {
     } catch (e) {
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
-        e.code === 'P2002'
+        e.code === "P2002"
       ) {
         throw new ApiException(
-          'SELLER_ALREADY_LINKED',
-          'This seller is already assigned to this event.',
+          "SELLER_ALREADY_LINKED",
+          "This seller is already assigned to this event.",
           HttpStatus.CONFLICT,
         );
       }
@@ -170,10 +170,10 @@ export class EventSellersService {
       sellerEventIds,
     );
     if (role === OrganizerRole.seller) {
-      throw new ApiException('FORBIDDEN', 'Forbidden.', HttpStatus.FORBIDDEN);
+      throw new ApiException("FORBIDDEN", "Forbidden.", HttpStatus.FORBIDDEN);
     }
     if (role !== OrganizerRole.admin && event.organizerId !== organizerId) {
-      throw new ApiException('FORBIDDEN', 'Forbidden.', HttpStatus.FORBIDDEN);
+      throw new ApiException("FORBIDDEN", "Forbidden.", HttpStatus.FORBIDDEN);
     }
 
     const res = await this.prisma.eventSeller.deleteMany({
@@ -181,8 +181,8 @@ export class EventSellersService {
     });
     if (res.count === 0) {
       throw new ApiException(
-        'EVENT_SELLER_NOT_FOUND',
-        'Seller assignment not found for this event.',
+        "EVENT_SELLER_NOT_FOUND",
+        "Seller assignment not found for this event.",
         HttpStatus.NOT_FOUND,
       );
     }

@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaymentStatus } from '@prisma/client';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { PaymentStatus } from "@prisma/client";
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsEnum,
@@ -10,7 +10,7 @@ import {
   IsUUID,
   MaxLength,
   Min,
-} from 'class-validator';
+} from "class-validator";
 
 export class CreateSaleDto {
   @ApiProperty()
@@ -33,7 +33,7 @@ export class CreateSaleDto {
   @IsInt()
   unit_price_cents?: number | null;
 
-  @ApiPropertyOptional({ example: 'USD' })
+  @ApiPropertyOptional({ example: "USD" })
   @IsOptional()
   @IsString()
   @MaxLength(3)
@@ -47,7 +47,7 @@ export class CreateSaleDto {
   @ApiPropertyOptional({
     type: [Number],
     description:
-      'Números de série das cartelas neste evento. Deve ter o mesmo tamanho que quantity; cada cartela deve estar disponível. Omita para atribuir automaticamente.',
+      "Números de série das cartelas neste evento. Deve ter o mesmo tamanho que quantity; cada cartela deve estar disponível. Omita para atribuir automaticamente.",
     example: [3, 7],
   })
   @IsOptional()

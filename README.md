@@ -12,7 +12,7 @@ MVP backend for the bingo event platform. API base path: `/api/v1`. OpenAPI UI: 
 
 1. **Start PostgreSQL**
 
-   From the repository root (parent of `backend/`):
+   From `bingora-backend/`:
 
    ```bash
    docker compose up -d
@@ -21,7 +21,7 @@ MVP backend for the bingo event platform. API base path: `/api/v1`. OpenAPI UI: 
 2. **Configure environment**
 
    ```bash
-   cd backend
+   cd bingora-backend
    cp .env.example .env
    ```
 
@@ -53,10 +53,19 @@ MVP backend for the bingo event platform. API base path: `/api/v1`. OpenAPI UI: 
 | `npm run lint` | ESLint |
 | `npm run format` | Prettier |
 | `npm test` | Unit tests |
-| `npm run test:e2e` | E2E tests (needs DB) |
+| `npm run test:e2e` | E2E smoke (uses Prisma mock; env set via `test/load-test-env.ts`) |
 | `npm run prisma:migrate` | Create/apply migrations (dev) |
 | `npm run prisma:generate` | Regenerate Prisma Client |
 | `npm run prisma:studio` | Prisma Studio |
+
+## Production hardening (implemented)
+
+- **Helmet** — security-related HTTP headers; full **Content-Security-Policy** only when `NODE_ENV=production` (Swagger is dev-only; see below).
+- **CORS** — set **`CORS_ORIGINS`** to a comma-separated list of allowed browser origins (e.g. `https://app.example.com`). Required when `NODE_ENV=production`. If unset in development, any origin is allowed (reflect) for local tooling.
+- **Rate limiting** — global default **120 requests / minute / IP**; **`POST /auth/login`** and **`POST /auth/register`** are limited to **10 / minute / IP**. **`GET /health`** is excluded from throttling.
+- **Swagger** — served at `/api/docs` only when **`NODE_ENV` is not `production`**.
+
+TLS termination is expected at the reverse proxy or load balancer in front of the app.
 
 ## Specification
 

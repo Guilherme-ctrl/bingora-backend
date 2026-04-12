@@ -1,15 +1,15 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { OrganizerRole, Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { ApiException } from '../common/exceptions/api.exception';
-import { jwtExpiresInSeconds } from './jwt-expires';
-import type { RegisterDto } from './dto/register.dto';
-import type { LoginDto } from './dto/login.dto';
-import type { AuthTokensResponseDto } from './dto/auth-response.dto';
-import { ConfigService } from '@nestjs/config';
-import type { AppEnv } from '../config/env.validation';
+import { HttpStatus, Injectable } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import { OrganizerRole, Prisma } from "@prisma/client";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApiException } from "../common/exceptions/api.exception";
+import { jwtExpiresInSeconds } from "./jwt-expires";
+import type { RegisterDto } from "./dto/register.dto";
+import type { LoginDto } from "./dto/login.dto";
+import type { AuthTokensResponseDto } from "./dto/auth-response.dto";
+import { ConfigService } from "@nestjs/config";
+import type { AppEnv } from "../config/env.validation";
 
 const BCRYPT_ROUNDS = 12;
 
@@ -38,11 +38,11 @@ export class AuthService {
     } catch (e) {
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
-        e.code === 'P2002'
+        e.code === "P2002"
       ) {
         throw new ApiException(
-          'EMAIL_ALREADY_REGISTERED',
-          'An account with this email already exists.',
+          "EMAIL_ALREADY_REGISTERED",
+          "An account with this email already exists.",
           HttpStatus.CONFLICT,
         );
       }
@@ -57,8 +57,8 @@ export class AuthService {
     });
     if (!organizer) {
       throw new ApiException(
-        'INVALID_CREDENTIALS',
-        'Invalid email or password.',
+        "INVALID_CREDENTIALS",
+        "Invalid email or password.",
         HttpStatus.UNAUTHORIZED,
       );
     }
@@ -66,8 +66,8 @@ export class AuthService {
     const ok = await bcrypt.compare(dto.password, organizer.passwordHash);
     if (!ok) {
       throw new ApiException(
-        'INVALID_CREDENTIALS',
-        'Invalid email or password.',
+        "INVALID_CREDENTIALS",
+        "Invalid email or password.",
         HttpStatus.UNAUTHORIZED,
       );
     }
@@ -91,7 +91,7 @@ export class AuthService {
     createdAt: Date,
   ): AuthTokensResponseDto {
     const expiresIn = jwtExpiresInSeconds(
-      this.config.get('JWT_EXPIRES_IN', { infer: true }),
+      this.config.get("JWT_EXPIRES_IN", { infer: true }),
     );
     const access_token = this.jwt.sign({ sub: organizerId, email, role });
     return {
@@ -102,7 +102,7 @@ export class AuthService {
         created_at: createdAt.toISOString(),
       },
       access_token,
-      token_type: 'Bearer',
+      token_type: "Bearer",
       expires_in: expiresIn,
     };
   }

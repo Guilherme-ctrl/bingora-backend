@@ -2,16 +2,41 @@ import {
   RequestMethod,
   ValidationPipe,
   type INestApplication,
-} from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import helmet from "helmet";
+import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
+import type { AppEnv } from "./config/env.validation";
 
-export function configureApp(app: INestApplication): void {
+export function configureApp(
+  app: INestApplication,
+  config: ConfigService<AppEnv, true>,
+): void {
+  const nodeEnv = config.get("NODE_ENV", { infer: true });
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+      contentSecurityPolicy: nodeEnv === "production",
+    }),
+  );
+
+  const corsRaw = config.get("CORS_ORIGINS", { infer: true });
+  const origin =
+    typeof corsRaw === "string" && corsRaw.trim().length > 0
+      ? corsRaw
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : nodeEnv === "production"
+        ? []
+        : true;
+
   app.enableCors({
-    origin: true,
+    origin,
     credentials: true,
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
   });
 
   app.useGlobalFilters(new AllExceptionsFilter());
@@ -26,31 +51,33 @@ export function configureApp(app: INestApplication): void {
     }),
   );
 
-  app.setGlobalPrefix('api/v1', {
-    exclude: [{ path: 'health', method: RequestMethod.GET }],
+  app.setGlobalPrefix("api/v1", {
+    exclude: [{ path: "health", method: RequestMethod.GET }],
   });
 
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Bingo Event API')
-    .setDescription(
-      [
-        'MVP organizer backend. Product and contract: repository `/Docs` (see `06-api-contract.md`).',
-        '',
-        '**Auth:** `Authorization: Bearer <access_token>` on protected routes.',
-        '',
-        '**Errors:** JSON `{ "error": { "code", "message", "details" } }` with 4xx/5xx per contract.',
-        '',
-        '**Validation:** failed DTO checks return **400** with `code: VALIDATION_ERROR` and `details.messages`.',
-      ].join('\n'),
-    )
-    .setVersion('1.0')
-    .addBearerAuth({
-      type: 'http',
-      scheme: 'bearer',
-      bearerFormat: 'JWT',
-      description: 'JWT from `POST /api/v1/auth/login` or `register`',
-    })
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/docs', app, document);
+  if (nodeEnv !== "production") {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle("Bingo Event API")
+      .setDescription(
+        [
+          "MVP organizer backend. Product and contract: repository `/Docs` (see `06-api-contract.md`).",
+          "",
+          "**Auth:** `Authorization: Bearer <access_token>` on protected routes.",
+          "",
+          '**Errors:** JSON `{ "error": { "code", "message", "details" } }` with 4xx/5xx per contract.',
+          "",
+          "**Validation:** failed DTO checks return **400** with `code: VALIDATION_ERROR` and `details.messages`.",
+        ].join("\n"),
+      )
+      .setVersion("1.0")
+      .addBearerAuth({
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+        description: "JWT from `POST /api/v1/auth/login` or `register`",
+      })
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup("api/docs", app, document);
+  }
 }

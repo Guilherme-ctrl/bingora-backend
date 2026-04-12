@@ -7,27 +7,27 @@ import {
   Patch,
   Post,
   UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CurrentOrganizer } from '../organizers/current-organizer.decorator';
-import type { CurrentOrganizerPayload } from '../organizers/current-organizer.decorator';
-import { SalesService } from './sales.service';
-import { UpdateSaleDto } from './dto/update-sale.dto';
-import { VoidSaleDto } from './dto/void-sale.dto';
+} from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { CurrentOrganizer } from "../organizers/current-organizer.decorator";
+import type { CurrentOrganizerPayload } from "../organizers/current-organizer.decorator";
+import { SalesService } from "./sales.service";
+import { UpdateSaleDto } from "./dto/update-sale.dto";
+import { VoidSaleDto } from "./dto/void-sale.dto";
 
-@ApiTags('sales')
-@Controller('sales')
+@ApiTags("sales")
+@Controller("sales")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class SalesController {
   constructor(private readonly sales: SalesService) {}
 
-  @Get(':saleId')
-  @ApiOperation({ summary: 'Get sale detail including assigned cards' })
+  @Get(":saleId")
+  @ApiOperation({ summary: "Get sale detail including assigned cards" })
   async getById(
     @CurrentOrganizer() user: CurrentOrganizerPayload,
-    @Param('saleId', ParseUUIDPipe) saleId: string,
+    @Param("saleId", ParseUUIDPipe) saleId: string,
   ) {
     return this.sales.getById(
       user.organizerId,
@@ -37,14 +37,14 @@ export class SalesController {
     );
   }
 
-  @Patch(':saleId')
+  @Patch(":saleId")
   @ApiOperation({
-    summary: 'Update sale (payment fields, notes)',
-    description: 'Use `payment_status` to mark paid or unpaid.',
+    summary: "Update sale (payment fields, notes)",
+    description: "Use `payment_status` to mark paid or unpaid.",
   })
   async update(
     @CurrentOrganizer() user: CurrentOrganizerPayload,
-    @Param('saleId', ParseUUIDPipe) saleId: string,
+    @Param("saleId", ParseUUIDPipe) saleId: string,
     @Body() dto: UpdateSaleDto,
   ) {
     return this.sales.update(
@@ -56,15 +56,15 @@ export class SalesController {
     );
   }
 
-  @Post(':saleId/void')
+  @Post(":saleId/void")
   @ApiOperation({
-    summary: 'Void sale and release cards back to available',
+    summary: "Void sale and release cards back to available",
     description:
-      'Request body `reason` is accepted for clients; not persisted in MVP.',
+      "Request body `reason` is accepted for clients; not persisted in MVP.",
   })
   async voidSale(
     @CurrentOrganizer() user: CurrentOrganizerPayload,
-    @Param('saleId', ParseUUIDPipe) saleId: string,
+    @Param("saleId", ParseUUIDPipe) saleId: string,
     @Body() body: VoidSaleDto,
   ) {
     void body.reason;

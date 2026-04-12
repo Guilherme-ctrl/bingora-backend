@@ -1,17 +1,17 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from "@nestjs/common";
 import {
   DrawCall,
   DrawSession,
   DrawSessionStatus,
   EventStatus,
   OrganizerRole,
-} from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { ApiException } from '../common/exceptions/api.exception';
-import { EventsService } from '../events/events.service';
-import { isPrismaUniqueViolation } from '../common/prisma/unique-violation';
-import { assertBallNumberInRange, canUseDrawForEvent } from './draw.policy';
-import type { PostCallDto } from './dto/post-call.dto';
+} from "@prisma/client";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApiException } from "../common/exceptions/api.exception";
+import { EventsService } from "../events/events.service";
+import { isPrismaUniqueViolation } from "../common/prisma/unique-violation";
+import { assertBallNumberInRange, canUseDrawForEvent } from "./draw.policy";
+import type { PostCallDto } from "./dto/post-call.dto";
 
 export type DrawSessionResponse = {
   id: string;
@@ -67,8 +67,8 @@ export class DrawService {
     if (existing) {
       if (existing.status === DrawSessionStatus.closed) {
         throw new ApiException(
-          'DRAW_SESSION_CLOSED',
-          'The draw session for this event is already closed.',
+          "DRAW_SESSION_CLOSED",
+          "The draw session for this event is already closed.",
           HttpStatus.CONFLICT,
         );
       }
@@ -96,8 +96,8 @@ export class DrawService {
       assertBallNumberInRange(dto.ball_number);
     } catch {
       throw new ApiException(
-        'INVALID_BALL_NUMBER',
-        'ball_number must be an integer from 1 to 75.',
+        "INVALID_BALL_NUMBER",
+        "ball_number must be an integer from 1 to 75.",
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -127,8 +127,8 @@ export class DrawService {
     } catch (e) {
       if (isPrismaUniqueViolation(e)) {
         throw new ApiException(
-          'DUPLICATE_BALL',
-          'This ball number has already been called in this session.',
+          "DUPLICATE_BALL",
+          "This ball number has already been called in this session.",
           HttpStatus.CONFLICT,
         );
       }
@@ -155,21 +155,21 @@ export class DrawService {
 
     if (!session || session.status !== DrawSessionStatus.open) {
       throw new ApiException(
-        'DRAW_SESSION_NOT_OPEN',
-        'No open draw session for this event.',
+        "DRAW_SESSION_NOT_OPEN",
+        "No open draw session for this event.",
         HttpStatus.NOT_FOUND,
       );
     }
 
     const last = await this.prisma.drawCall.findFirst({
       where: { drawSessionId: session.id },
-      orderBy: { sequence: 'desc' },
+      orderBy: { sequence: "desc" },
     });
 
     if (!last) {
       throw new ApiException(
-        'NO_CALLS',
-        'There are no calls to remove.',
+        "NO_CALLS",
+        "There are no calls to remove.",
         HttpStatus.NOT_FOUND,
       );
     }
@@ -204,7 +204,7 @@ export class DrawService {
 
     const calls = await this.prisma.drawCall.findMany({
       where: { drawSessionId: session.id },
-      orderBy: { sequence: 'asc' },
+      orderBy: { sequence: "asc" },
     });
 
     const called = new Set(calls.map((c) => c.ballNumber));
@@ -240,8 +240,8 @@ export class DrawService {
 
     if (!session) {
       throw new ApiException(
-        'DRAW_SESSION_NOT_FOUND',
-        'No draw session exists for this event.',
+        "DRAW_SESSION_NOT_FOUND",
+        "No draw session exists for this event.",
         HttpStatus.NOT_FOUND,
       );
     }
@@ -264,8 +264,8 @@ export class DrawService {
   private assertDrawableEvent(status: EventStatus): void {
     if (!canUseDrawForEvent(status)) {
       throw new ApiException(
-        'EVENT_NOT_DRAWABLE',
-        'The event must be scheduled or in progress to use the draw.',
+        "EVENT_NOT_DRAWABLE",
+        "The event must be scheduled or in progress to use the draw.",
         HttpStatus.CONFLICT,
       );
     }
@@ -278,16 +278,16 @@ export class DrawService {
 
     if (!session) {
       throw new ApiException(
-        'DRAW_SESSION_NOT_FOUND',
-        'Start a draw session before recording calls.',
+        "DRAW_SESSION_NOT_FOUND",
+        "Start a draw session before recording calls.",
         HttpStatus.NOT_FOUND,
       );
     }
 
     if (session.status !== DrawSessionStatus.open) {
       throw new ApiException(
-        'DRAW_SESSION_NOT_OPEN',
-        'The draw session is closed.',
+        "DRAW_SESSION_NOT_OPEN",
+        "The draw session is closed.",
         HttpStatus.CONFLICT,
       );
     }
