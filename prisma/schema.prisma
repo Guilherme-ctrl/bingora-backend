@@ -1,0 +1,228 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventStatus {
+  draft
+  scheduled
+  in_progress
+  completed
+  cancelled
+}
+
+enum BingoCardStatus {
+  available
+  assigned
+  voided
+}
+
+enum PaymentStatus {
+  unpaid
+  paid
+}
+
+enum SaleStatus {
+  active
+  voided
+}
+
+enum DrawSessionStatus {
+  open
+  closed
+}
+
+enum OrganizerRole {
+  admin
+  member
+  /// Só vendas nos eventos em que foi designado pelo dono.
+  seller
+}
+
+model Organizer {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String        @map("password_hash")
+  role         OrganizerRole @default(member)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  events                 Event[]
+  eventSellerAssignments EventSeller[] @relation("EventSellerAccount")
+}
+
+model Event {
+  id          String      @id @default(uuid())
+  organizerId String      @map("organizer_id")
+  title       String
+  startsAt    DateTime    @map("starts_at")
+  timezone    String
+  venueNotes  String?     @map("venue_notes")
+  /// Preço sugerido por cartela (centavos); usado para pré-preencher vendas.
+  defaultUnitPriceCents Int?    @map("default_unit_price_cents")
+  defaultCurrency       String  @default("BRL") @map("default_currency")
+  /// Caminho público servido em `/uploads/...` (ex.: `/uploads/event-logos/{id}.png`).
+  logoUrl     String?     @map("logo_url")
+  status      EventStatus @default(draft)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  organizer    Organizer     @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  prizes       Prize[]
+  bingoCards   BingoCard[]
+  participants Participant[]
+  sales        Sale[]
+  drawSession  DrawSession?
+  winners      Winner[]
+  eventSellers EventSeller[]
+
+  @@index([organizerId])
+}
+
+/// Vínculo: um organizador com papel `seller` pode operar vendas neste evento.
+model EventSeller {
+  id                String   @id @default(uuid())
+  eventId           String   @map("event_id")
+  sellerOrganizerId String   @map("seller_organizer_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  event  Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  seller Organizer @relation("EventSellerAccount", fields: [sellerOrganizerId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, sellerOrganizerId])
+  @@index([sellerOrganizerId])
+  @@index([eventId])
+}
+
+model Prize {
+  id          String   @id @default(uuid())
+  eventId     String   @map("event_id")
+  name        String
+  description String?
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  winners Winner[]
+
+  @@index([eventId])
+}
+
+model BingoCard {
+  id              String          @id @default(uuid())
+  eventId         String          @map("event_id")
+  serialNumber    Int             @map("serial_number")
+  grid            Json
+  gridFingerprint String          @map("grid_fingerprint")
+  status          BingoCardStatus @default(available)
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  saleCards SaleCard[]
+  winners   Winner[]
+
+  @@unique([eventId, serialNumber])
+  @@unique([eventId, gridFingerprint])
+  @@index([eventId])
+}
+
+model Participant {
+  id          String   @id @default(uuid())
+  eventId     String   @map("event_id")
+  displayName String   @map("display_name")
+  email       String?
+  phone       String?
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  sales   Sale[]
+  winners Winner[]
+
+  @@index([eventId])
+}
+
+model Sale {
+  id             String         @id @default(uuid())
+  eventId        String         @map("event_id")
+  participantId  String         @map("participant_id")
+  quantity       Int
+  paymentStatus  PaymentStatus  @map("payment_status")
+  unitPriceCents Int?           @map("unit_price_cents")
+  currency       String         @default("USD")
+  notes          String?
+  status         SaleStatus     @default(active)
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  saleCards   SaleCard[]
+
+  @@index([eventId])
+  @@index([participantId])
+}
+
+model SaleCard {
+  id          String   @id @default(uuid())
+  saleId      String   @map("sale_id")
+  bingoCardId String   @map("bingo_card_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  sale      Sale      @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  bingoCard BingoCard @relation(fields: [bingoCardId], references: [id], onDelete: Restrict)
+
+  @@unique([bingoCardId])
+  @@index([saleId])
+}
+
+model DrawSession {
+  id        String              @id @default(uuid())
+  eventId   String              @unique @map("event_id")
+  startedAt DateTime            @default(now()) @map("started_at")
+  closedAt  DateTime?           @map("closed_at")
+  status    DrawSessionStatus   @default(open)
+
+  event Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  calls DrawCall[]
+}
+
+model DrawCall {
+  id             String   @id @default(uuid())
+  drawSessionId  String   @map("draw_session_id")
+  sequence       Int
+  ballNumber     Int      @map("ball_number")
+  calledAt       DateTime @default(now()) @map("called_at")
+  note           String?
+
+  drawSession DrawSession @relation(fields: [drawSessionId], references: [id], onDelete: Cascade)
+
+  @@unique([drawSessionId, sequence])
+  @@unique([drawSessionId, ballNumber])
+  @@index([drawSessionId])
+}
+
+model Winner {
+  id           String    @id @default(uuid())
+  eventId      String    @map("event_id")
+  prizeId      String    @map("prize_id")
+  participantId String   @map("participant_id")
+  bingoCardId  String?   @map("bingo_card_id")
+  notes        String?
+  recordedAt   DateTime  @default(now()) @map("recorded_at")
+  revokedAt    DateTime? @map("revoked_at")
+
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  prize       Prize       @relation(fields: [prizeId], references: [id], onDelete: Restrict)
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  bingoCard   BingoCard?  @relation(fields: [bingoCardId], references: [id], onDelete: SetNull)
+
+  @@index([eventId])
+  @@index([prizeId])
+}
