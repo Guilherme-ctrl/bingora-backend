@@ -36,6 +36,47 @@ enum DrawSessionStatus {
   closed
 }
 
+enum RoundStatus {
+  CRIADA
+  EM_VENDA
+  AGUARDANDO_CONFERENCIA
+  EM_SORTEIO
+  FINALIZADA
+}
+
+enum RoundType {
+  binguinho
+  roda_da_fortuna
+  bingao
+}
+
+enum EventOperationalRole {
+  admin_evento
+  bingueiro
+  mesario
+  vendedor
+}
+
+enum DomainEventType {
+  VENDA_REGISTRADA
+  VENDA_ESTORNADA
+  NUMERO_SORTEADO
+  NUMERO_INVALIDADO
+  VENDEDOR_CONFERIDO
+  VENDEDOR_DIVERGENTE
+  RODADA_FINALIZADA
+}
+
+enum DrawCallStatus {
+  active
+  invalidated
+}
+
+enum SellerReconciliationStatus {
+  CONFERIDO
+  DIVERGENTE
+}
+
 enum OrganizerRole {
   admin
   member
@@ -53,6 +94,7 @@ model Organizer {
 
   events                 Event[]
   eventSellerAssignments EventSeller[] @relation("EventSellerAccount")
+  roleAssignments        EventRoleAssignment[]
 }
 
 model Event {
@@ -79,6 +121,9 @@ model Event {
   drawSession  DrawSession?
   winners      Winner[]
   eventSellers EventSeller[]
+  rounds       Round[]
+  roleAssignments EventRoleAssignment[]
+  domainEventLogs DomainEventLog[]
 
   @@index([organizerId])
 }
@@ -151,7 +196,9 @@ model Participant {
 model Sale {
   id             String         @id @default(uuid())
   eventId        String         @map("event_id")
-  participantId  String         @map("participant_id")
+  roundId        String?        @map("round_id")
+  participantId  String?        @map("participant_id")
+  sellerOrganizerId String?     @map("seller_organizer_id")
   quantity       Int
   paymentStatus  PaymentStatus  @map("payment_status")
   unitPriceCents Int?           @map("unit_price_cents")
@@ -162,10 +209,13 @@ model Sale {
   updatedAt      DateTime       @updatedAt @map("updated_at")
 
   event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  participant Participant @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  round       Round?      @relation(fields: [roundId], references: [id], onDelete: SetNull)
+  participant Participant? @relation(fields: [participantId], references: [id], onDelete: Restrict)
   saleCards   SaleCard[]
 
   @@index([eventId])
+  @@index([roundId])
+  @@index([sellerOrganizerId])
   @@index([participantId])
 }
 
@@ -200,12 +250,84 @@ model DrawCall {
   ballNumber     Int      @map("ball_number")
   calledAt       DateTime @default(now()) @map("called_at")
   note           String?
+  status         DrawCallStatus @default(active)
+  invalidatedAt  DateTime?      @map("invalidated_at")
+  invalidationReason String?    @map("invalidation_reason")
 
   drawSession DrawSession @relation(fields: [drawSessionId], references: [id], onDelete: Cascade)
 
   @@unique([drawSessionId, sequence])
-  @@unique([drawSessionId, ballNumber])
+  @@unique([drawSessionId, ballNumber, status])
   @@index([drawSessionId])
+}
+
+model Round {
+  id         String     @id @default(uuid())
+  eventId    String     @map("event_id")
+  code       String
+  type       RoundType
+  status     RoundStatus @default(CRIADA)
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+  finishedAt DateTime?  @map("finished_at")
+
+  event           Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  domainEventLogs DomainEventLog[]
+  sales           Sale[]
+  sellerReconciliations SellerReconciliation[]
+
+  @@unique([eventId, code])
+  @@index([eventId])
+  @@index([eventId, status])
+}
+
+model SellerReconciliation {
+  id         String                     @id @default(uuid())
+  roundId    String                     @map("round_id")
+  sellerOrganizerId String              @map("seller_organizer_id")
+  status     SellerReconciliationStatus
+  justification String?                 @map("justification")
+  checkedByOrganizerId String           @map("checked_by_organizer_id")
+  createdAt  DateTime                   @default(now()) @map("created_at")
+  updatedAt  DateTime                   @updatedAt @map("updated_at")
+
+  round      Round                      @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  @@unique([roundId, sellerOrganizerId])
+  @@index([roundId, status])
+}
+
+model EventRoleAssignment {
+  id         String               @id @default(uuid())
+  eventId    String               @map("event_id")
+  organizerId String              @map("organizer_id")
+  role       EventOperationalRole
+  createdAt  DateTime             @default(now()) @map("created_at")
+
+  event      Event                @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  organizer  Organizer            @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, organizerId, role])
+  @@index([eventId, role])
+  @@index([organizerId])
+}
+
+model DomainEventLog {
+  id         String          @id @default(uuid())
+  eventId    String          @map("event_id")
+  roundId    String?         @map("round_id")
+  actorId    String?         @map("actor_id")
+  actorRole  String?         @map("actor_role")
+  eventType  DomainEventType @map("event_type")
+  payloadJson Json           @map("payload_json")
+  createdAt  DateTime        @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  round Round? @relation(fields: [roundId], references: [id], onDelete: SetNull)
+
+  @@index([eventId, createdAt])
+  @@index([roundId, createdAt])
+  @@index([eventType, createdAt])
 }
 
 model Winner {

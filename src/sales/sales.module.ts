@@ -2,12 +2,13 @@ import { Module } from "@nestjs/common";
 import { AuthModule } from "../auth/auth.module";
 import { CardsModule } from "../cards/cards.module";
 import { EventsModule } from "../events/events.module";
+import { DomainEventsModule } from "../domain-events/domain-events.module";
 import { EventSalesController } from "./event-sales.controller";
 import { SalesController } from "./sales.controller";
 import { SalesService } from "./sales.service";
 
 @Module({
-  imports: [AuthModule, EventsModule, CardsModule],
+  imports: [AuthModule, EventsModule, CardsModule, DomainEventsModule],
   controllers: [EventSalesController, SalesController],
   providers: [SalesService],
   exports: [SalesService],

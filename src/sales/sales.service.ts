@@ -1,18 +1,22 @@
-import { HttpStatus, Injectable } from "@nestjs/common";
+import { HttpStatus, Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import {
   BingoCard,
   BingoCardStatus,
+  DomainEventType,
   OrganizerRole,
   PaymentStatus,
   Prisma,
   Sale,
   SaleStatus,
+  RoundStatus,
 } from "@prisma/client";
 import { canAccessOrganizerResource } from "../common/access/organizer-resource-access";
 import { PrismaService } from "../prisma/prisma.service";
 import { ApiException } from "../common/exceptions/api.exception";
 import { EventsService } from "../events/events.service";
 import { isEventLocked } from "../events/event-status.policy";
+import type { AppEnv } from "../config/env.validation";
 import type { CreateSaleDto } from "./dto/create-sale.dto";
 import type { UpdateSaleDto } from "./dto/update-sale.dto";
 import type { ListSalesQueryDto } from "./dto/list-sales-query.dto";
@@ -25,7 +29,9 @@ export type SaleCardSummary = {
 export type SaleResponse = {
   id: string;
   event_id: string;
-  participant_id: string;
+  round_id: string | null;
+  seller_organizer_id: string | null;
+  participant_id: string | null;
   quantity: number;
   payment_status: PaymentStatus;
   unit_price_cents: number | null;
@@ -40,7 +46,9 @@ export type SaleResponse = {
 export type SaleSummary = {
   id: string;
   event_id: string;
-  participant_id: string;
+  round_id: string | null;
+  seller_organizer_id: string | null;
+  participant_id: string | null;
   quantity: number;
   payment_status: PaymentStatus;
   unit_price_cents: number | null;
@@ -53,9 +61,12 @@ export type SaleSummary = {
 
 @Injectable()
 export class SalesService {
+  private readonly logger = new Logger(SalesService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: EventsService,
+    private readonly config: ConfigService<AppEnv, true>,
   ) {}
 
   async create(
@@ -81,19 +92,33 @@ export class SalesService {
     }
 
     const currency = dto.currency ?? "USD";
+    const roundFlowEnforced = this.isRoundFlowEnforced();
+    const activeRound = await this.prisma.round.findFirst({
+      where: { eventId, status: RoundStatus.EM_VENDA },
+      orderBy: { createdAt: "desc" },
+    });
+    if (roundFlowEnforced && !activeRound) {
+      throw new ApiException(
+        "ROUND_NOT_OPEN_FOR_SALES",
+        "Sales are only allowed when there is a round in EM_VENDA.",
+        HttpStatus.CONFLICT,
+      );
+    }
 
     const result = await this.prisma.$transaction(
       async (tx) => {
-        const participant = await tx.participant.findFirst({
-          where: { id: dto.participant_id, eventId },
-        });
+        if (dto.participant_id) {
+          const participant = await tx.participant.findFirst({
+            where: { id: dto.participant_id, eventId },
+          });
 
-        if (!participant) {
-          throw new ApiException(
-            "PARTICIPANT_NOT_FOUND",
-            "Participant not found for this event.",
-            HttpStatus.NOT_FOUND,
-          );
+          if (!participant) {
+            throw new ApiException(
+              "PARTICIPANT_NOT_FOUND",
+              "Participant not found for this event.",
+              HttpStatus.NOT_FOUND,
+            );
+          }
         }
 
         const requestedSerials =
@@ -171,7 +196,9 @@ export class SalesService {
         const sale = await tx.sale.create({
           data: {
             eventId,
-            participantId: dto.participant_id,
+            roundId: activeRound?.id ?? null,
+            sellerOrganizerId: organizerId,
+            participantId: dto.participant_id ?? null,
             quantity: dto.quantity,
             paymentStatus: dto.payment_status,
             unitPriceCents: dto.unit_price_cents ?? null,
@@ -194,7 +221,35 @@ export class SalesService {
           });
         }
 
-        return await this.loadSaleResponse(tx, sale.id);
+        const response = await this.loadSaleResponse(tx, sale.id);
+        await tx.domainEventLog.create({
+          data: {
+            eventId,
+            actorId: organizerId,
+            actorRole: role,
+            eventType: DomainEventType.VENDA_REGISTRADA,
+            payloadJson: {
+              sale_id: response.id,
+              round_id: response.round_id,
+              seller_organizer_id: response.seller_organizer_id,
+              quantity: response.quantity,
+              participant_id: response.participant_id,
+              card_serials: response.cards.map((card) => card.serial_number),
+            },
+          },
+        });
+        this.logger.log(
+          JSON.stringify({
+            event: "domain_event",
+            event_type: DomainEventType.VENDA_REGISTRADA,
+            event_id: eventId,
+            round_id: response.round_id,
+            actor_id: organizerId,
+            sale_id: response.id,
+          }),
+        );
+
+        return response;
       },
       {
         isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
@@ -408,6 +463,29 @@ export class SalesService {
         where: { id: saleId },
         data: { status: SaleStatus.voided },
       });
+
+      await tx.domainEventLog.create({
+        data: {
+          eventId: existing.eventId,
+          actorId: organizerId,
+          actorRole: role,
+          eventType: DomainEventType.VENDA_ESTORNADA,
+          payloadJson: {
+            sale_id: existing.id,
+            restored_card_ids: cardIds,
+          },
+        },
+      });
+      this.logger.log(
+        JSON.stringify({
+          event: "domain_event",
+          event_type: DomainEventType.VENDA_ESTORNADA,
+          event_id: existing.eventId,
+          round_id: existing.roundId ?? null,
+          actor_id: organizerId,
+          sale_id: existing.id,
+        }),
+      );
     });
 
     return this.getById(organizerId, role, saleId, sellerEventIds);
@@ -431,6 +509,8 @@ export class SalesService {
     return {
       id: sale.id,
       event_id: sale.eventId,
+      round_id: sale.roundId,
+      seller_organizer_id: sale.sellerOrganizerId,
       participant_id: sale.participantId,
       quantity: sale.quantity,
       payment_status: sale.paymentStatus,
@@ -455,6 +535,8 @@ export class SalesService {
     return {
       id: sale.id,
       event_id: sale.eventId,
+      round_id: sale.roundId,
+      seller_organizer_id: sale.sellerOrganizerId,
       participant_id: sale.participantId,
       quantity: sale.quantity,
       payment_status: sale.paymentStatus,
@@ -466,5 +548,14 @@ export class SalesService {
       created_at: sale.createdAt.toISOString(),
       updated_at: sale.updatedAt.toISOString(),
     };
+  }
+
+  private isRoundFlowEnforced(): boolean {
+    const raw = this.config.get("ROUND_FLOW_ENFORCED", { infer: true });
+    if (typeof raw !== "string") {
+      return false;
+    }
+    const normalized = raw.trim().toLowerCase();
+    return normalized === "1" || normalized === "true" || normalized === "yes";
   }
 }

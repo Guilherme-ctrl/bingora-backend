@@ -16,6 +16,8 @@ import { DrawModule } from "./draw/draw.module";
 import { WinnersModule } from "./winners/winners.module";
 import { FinanceModule } from "./finance/finance.module";
 import { EventSellersModule } from "./event-sellers/event-sellers.module";
+import { RoundsModule } from "./rounds/rounds.module";
+import { DomainEventsModule } from "./domain-events/domain-events.module";
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { EventSellersModule } from "./event-sellers/event-sellers.module";
     WinnersModule,
     FinanceModule,
     EventSellersModule,
+    RoundsModule,
+    DomainEventsModule,
     HealthModule,
   ],
   providers: [

@@ -6,6 +6,8 @@ export type AppEnv = {
   JWT_EXPIRES_IN: string;
   /** Comma-separated browser origins allowed by CORS (required when NODE_ENV is production). */
   CORS_ORIGINS?: string;
+  /** When true, sales require active round in EM_VENDA. */
+  ROUND_FLOW_ENFORCED?: string;
 };
 
 export function validateEnv(config: Record<string, unknown>): AppEnv {

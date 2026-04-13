@@ -13,9 +13,10 @@ import {
 } from "class-validator";
 
 export class CreateSaleDto {
-  @ApiProperty()
+  @ApiPropertyOptional({ nullable: true })
+  @IsOptional()
   @IsUUID()
-  participant_id!: string;
+  participant_id?: string | null;
 
   @ApiProperty({ minimum: 1 })
   @Type(() => Number)
