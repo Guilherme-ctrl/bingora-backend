@@ -97,7 +97,9 @@ export class RoundsService {
   }
 
   async transition(roundId: string, targetStatus: RoundStatus): Promise<Round> {
-    const round = await this.prisma.round.findUnique({ where: { id: roundId } });
+    const round = await this.prisma.round.findUnique({
+      where: { id: roundId },
+    });
     if (!round) {
       throw new ApiException(
         "ROUND_NOT_FOUND",
@@ -123,7 +125,9 @@ export class RoundsService {
       data: {
         status: targetStatus,
         finishedAt:
-          targetStatus === RoundStatus.FINALIZADA ? new Date() : round.finishedAt,
+          targetStatus === RoundStatus.FINALIZADA
+            ? new Date()
+            : round.finishedAt,
       },
     });
   }
@@ -395,7 +399,11 @@ export class RoundsService {
       where: { id: roundId },
     });
     if (!round) {
-      throw new ApiException("ROUND_NOT_FOUND", "Round not found.", HttpStatus.NOT_FOUND);
+      throw new ApiException(
+        "ROUND_NOT_FOUND",
+        "Round not found.",
+        HttpStatus.NOT_FOUND,
+      );
     }
     return round;
   }
@@ -465,7 +473,10 @@ export class RoundsService {
         EventOperationalRole.admin_evento,
         EventOperationalRole.mesario,
       ],
-      "round.finish": [EventOperationalRole.admin_evento, EventOperationalRole.mesario],
+      "round.finish": [
+        EventOperationalRole.admin_evento,
+        EventOperationalRole.mesario,
+      ],
     };
 
     if (!allowedByAction[action].some((role) => roleSet.has(role))) {

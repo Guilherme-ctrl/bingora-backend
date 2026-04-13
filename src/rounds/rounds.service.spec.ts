@@ -1,5 +1,9 @@
 import { HttpStatus } from "@nestjs/common";
-import { OrganizerRole, RoundStatus, SellerReconciliationStatus } from "@prisma/client";
+import {
+  OrganizerRole,
+  RoundStatus,
+  SellerReconciliationStatus,
+} from "@prisma/client";
 import { RoundsService } from "./rounds.service";
 
 describe("RoundsService", () => {
@@ -92,7 +96,11 @@ describe("RoundsService", () => {
       finishedAt: null,
     });
 
-    const updated = await service.startDraw("admin-1", OrganizerRole.admin, "r1");
+    const updated = await service.startDraw(
+      "admin-1",
+      OrganizerRole.admin,
+      "r1",
+    );
     expect(updated.status).toBe(RoundStatus.EM_SORTEIO);
     expect(prisma.round.update).toHaveBeenCalledTimes(1);
   });

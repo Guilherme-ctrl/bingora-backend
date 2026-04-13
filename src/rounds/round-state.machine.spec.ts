@@ -25,7 +25,10 @@ describe("round-state.machine", () => {
 
   it("blocks invalid transitions", () => {
     expect(
-      canTransitionRound(RoundStatus.CRIADA, RoundStatus.AGUARDANDO_CONFERENCIA),
+      canTransitionRound(
+        RoundStatus.CRIADA,
+        RoundStatus.AGUARDANDO_CONFERENCIA,
+      ),
     ).toBe(false);
     expect(
       canTransitionRound(RoundStatus.EM_VENDA, RoundStatus.FINALIZADA),

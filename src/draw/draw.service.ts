@@ -177,9 +177,15 @@ export class DrawService {
     dto: PostCallDto,
     sellerEventIds: string[],
   ): Promise<DrawCallResponse> {
-    const round = await this.prisma.round.findUnique({ where: { id: roundId } });
+    const round = await this.prisma.round.findUnique({
+      where: { id: roundId },
+    });
     if (!round) {
-      throw new ApiException("ROUND_NOT_FOUND", "Round not found.", HttpStatus.NOT_FOUND);
+      throw new ApiException(
+        "ROUND_NOT_FOUND",
+        "Round not found.",
+        HttpStatus.NOT_FOUND,
+      );
     }
     if (round.status !== RoundStatus.EM_SORTEIO) {
       throw new ApiException(
@@ -188,13 +194,7 @@ export class DrawService {
         HttpStatus.CONFLICT,
       );
     }
-    return this.postCall(
-      organizerId,
-      role,
-      round.eventId,
-      dto,
-      sellerEventIds,
-    );
+    return this.postCall(organizerId, role, round.eventId, dto, sellerEventIds);
   }
 
   async deleteLastCall(
@@ -281,9 +281,15 @@ export class DrawService {
     reason: string,
     sellerEventIds: string[],
   ): Promise<void> {
-    const round = await this.prisma.round.findUnique({ where: { id: roundId } });
+    const round = await this.prisma.round.findUnique({
+      where: { id: roundId },
+    });
     if (!round) {
-      throw new ApiException("ROUND_NOT_FOUND", "Round not found.", HttpStatus.NOT_FOUND);
+      throw new ApiException(
+        "ROUND_NOT_FOUND",
+        "Round not found.",
+        HttpStatus.NOT_FOUND,
+      );
     }
     if (round.status !== RoundStatus.EM_SORTEIO) {
       throw new ApiException(
@@ -305,7 +311,11 @@ export class DrawService {
       where: { id: callId, drawSessionId: session.id },
     });
     if (!call) {
-      throw new ApiException("DRAW_CALL_NOT_FOUND", "Draw call not found.", HttpStatus.NOT_FOUND);
+      throw new ApiException(
+        "DRAW_CALL_NOT_FOUND",
+        "Draw call not found.",
+        HttpStatus.NOT_FOUND,
+      );
     }
     if (call.status === DrawCallStatus.invalidated) {
       return;

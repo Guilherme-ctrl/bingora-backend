@@ -11,8 +11,14 @@ const ALLOWED_ROLES_BY_ACTION: Record<RoundAction, EventOperationalRole[]> = {
   "round.create": [EventOperationalRole.admin_evento],
   "round.open_sales": [EventOperationalRole.admin_evento],
   "round.close_sales": [EventOperationalRole.admin_evento],
-  "round.start_draw": [EventOperationalRole.admin_evento, EventOperationalRole.mesario],
-  "round.finish": [EventOperationalRole.admin_evento, EventOperationalRole.mesario],
+  "round.start_draw": [
+    EventOperationalRole.admin_evento,
+    EventOperationalRole.mesario,
+  ],
+  "round.finish": [
+    EventOperationalRole.admin_evento,
+    EventOperationalRole.mesario,
+  ],
 };
 
 export function hasRoundActionPermission(

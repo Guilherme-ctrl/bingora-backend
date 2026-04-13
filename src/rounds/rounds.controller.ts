@@ -112,7 +112,11 @@ export class RoundsController {
     @CurrentOrganizer() user: CurrentOrganizerPayload,
     @Param("roundId", ParseUUIDPipe) roundId: string,
   ) {
-    return this.rounds.listSellerReconciliation(user.organizerId, user.role, roundId);
+    return this.rounds.listSellerReconciliation(
+      user.organizerId,
+      user.role,
+      roundId,
+    );
   }
 
   @Post("rounds/:roundId/seller-reconciliation/:sellerOrganizerId")
