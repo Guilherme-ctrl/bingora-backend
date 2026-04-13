@@ -6,6 +6,8 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import helmet from "helmet";
+import { randomUUID } from "node:crypto";
+import type { Request, Response, NextFunction } from "express";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import type { AppEnv } from "./config/env.validation";
 
@@ -37,6 +39,13 @@ export function configureApp(
     credentials: true,
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+  });
+
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const reqId = req.header("x-request-id") ?? randomUUID();
+    req.headers["x-request-id"] = reqId;
+    res.setHeader("x-request-id", reqId);
+    next();
   });
 
   app.useGlobalFilters(new AllExceptionsFilter());

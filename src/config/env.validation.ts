@@ -8,6 +8,10 @@ export type AppEnv = {
   CORS_ORIGINS?: string;
   /** When true, sales require active round in EM_VENDA. */
   ROUND_FLOW_ENFORCED?: string;
+  SENTRY_DSN?: string;
+  SENTRY_ENVIRONMENT?: string;
+  SENTRY_RELEASE?: string;
+  SENTRY_TRACES_SAMPLE_RATE?: string;
 };
 
 export function validateEnv(config: Record<string, unknown>): AppEnv {
@@ -55,6 +59,12 @@ export function validateEnv(config: Record<string, unknown>): AppEnv {
     throw new Error(`Invalid environment:\n- ${errors.join("\n- ")}`);
   }
 
+  const roundFlowEnforced = config["ROUND_FLOW_ENFORCED"];
+  const sentryDsn = config["SENTRY_DSN"];
+  const sentryEnvironment = config["SENTRY_ENVIRONMENT"];
+  const sentryRelease = config["SENTRY_RELEASE"];
+  const sentryTracesSampleRate = config["SENTRY_TRACES_SAMPLE_RATE"];
+
   return {
     NODE_ENV: nodeEnv,
     PORT: port,
@@ -62,5 +72,21 @@ export function validateEnv(config: Record<string, unknown>): AppEnv {
     JWT_SECRET: jwtSecret as string,
     JWT_EXPIRES_IN: jwtExpiresIn as string,
     ...(corsOriginsStr.length > 0 ? { CORS_ORIGINS: corsOriginsStr } : {}),
+    ...(typeof roundFlowEnforced === "string" && roundFlowEnforced.length > 0
+      ? { ROUND_FLOW_ENFORCED: roundFlowEnforced }
+      : {}),
+    ...(typeof sentryDsn === "string" && sentryDsn.length > 0
+      ? { SENTRY_DSN: sentryDsn }
+      : {}),
+    ...(typeof sentryEnvironment === "string" && sentryEnvironment.length > 0
+      ? { SENTRY_ENVIRONMENT: sentryEnvironment }
+      : {}),
+    ...(typeof sentryRelease === "string" && sentryRelease.length > 0
+      ? { SENTRY_RELEASE: sentryRelease }
+      : {}),
+    ...(typeof sentryTracesSampleRate === "string" &&
+    sentryTracesSampleRate.length > 0
+      ? { SENTRY_TRACES_SAMPLE_RATE: sentryTracesSampleRate }
+      : {}),
   };
 }

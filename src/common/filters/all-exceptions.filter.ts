@@ -7,6 +7,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
+import * as Sentry from "@sentry/node";
 import type { Request, Response } from "express";
 import type { ApiErrorBody } from "../exceptions/api.exception";
 
@@ -102,9 +103,31 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     const path = `${request.method} ${request.url}`;
+    const requestId = request.header("x-request-id");
     this.logger.warn(
       `${path} -> ${status} ${body.error.code}: ${body.error.message}`,
     );
+
+    const shouldCapture =
+      status >= HttpStatus.INTERNAL_SERVER_ERROR ||
+      body.error.code === "HTTP_EXCEPTION";
+    if (shouldCapture) {
+      Sentry.withScope((scope) => {
+        scope.setTag("app", "backend");
+        scope.setTag("http_status", String(status));
+        scope.setTag("error_code", body.error.code);
+        scope.setTag("route", `${request.method} ${request.path}`);
+        if (requestId) scope.setTag("request_id", requestId);
+        scope.setContext("http", {
+          method: request.method,
+          url: request.url,
+          status,
+        });
+        Sentry.captureException(
+          exception instanceof Error ? exception : new Error(String(exception)),
+        );
+      });
+    }
 
     response.status(status).json(body);
   }
