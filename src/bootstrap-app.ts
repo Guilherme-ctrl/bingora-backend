@@ -38,7 +38,7 @@ export function configureApp(
     origin,
     credentials: true,
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'baggage', 'sentry-trace'],
   });
 
   app.use((req: Request, res: Response, next: NextFunction) => {
